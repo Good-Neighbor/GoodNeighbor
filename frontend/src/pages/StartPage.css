@@ -1,0 +1,70 @@
+.main-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f3f4f6;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.main-card {
+  background-color: #ffffff;
+  padding: 50px;
+  border-radius: 16px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+.main-title {
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 40px;
+  color: #333333;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.main-button {
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  color: white;
+}
+
+.main-button:hover {
+  transform: translateY(-3px);
+}
+
+.sign-in-button {
+  background-color: #2563eb;
+}
+
+.sign-in-button:hover {
+  background-color: #1e40af;
+}
+
+.listings-button {
+  background-color: #10b981;
+}
+
+.listings-button:hover {
+  background-color: #047857;
+}
+
+.create-button {
+  background-color: #9333ea;
+}
+
+.create-button:hover {
+  background-color: #6b21a8;
+}
