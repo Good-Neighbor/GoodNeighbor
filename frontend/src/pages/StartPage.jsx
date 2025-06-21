@@ -1,5 +1,6 @@
 import './StartPage.css'
-import { useNavigate } from 'react-dom'
+import { useNavigate } from 'react-router-dom';
+import React from 'react';
 
 function StartPage() {
   const navigate = useNavigate();
