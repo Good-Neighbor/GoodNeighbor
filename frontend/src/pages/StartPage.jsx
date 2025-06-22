@@ -1,4 +1,4 @@
-import './StartPage.css'
+import './StartPage.css';
 import { useNavigate } from 'react-router-dom';
 import React from 'react';
 
@@ -6,23 +6,56 @@ function StartPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="main-container">
-      <div className="main-card">
-        <h1 className="main-title">Welcome</h1>
-        <div className="button-group">
-          <button className="main-button sign-in-button" onClick={() => navigate("Navigate to Sign In")}>
-            Sign In
-          </button>
-          <button className="main-button listings-button" onClick={() => navigate("Navigate to Listings")}>
-            Go to Listings
-          </button>
-          <button className="main-button create-button" onClick={() => navigate("Navigate to Create Listing")}>
-            Create Listing
-          </button>
+    <div className="start-container">
+      <div className="start-card">
+        <div className="start-header">
+          <h1 className="start-title">Welcome to GoodNeighbor</h1>
+          <p className="start-subtitle">Your community marketplace</p>
+        </div>
+
+        <div className="start-content">
+          <p className="start-description">
+            Connect with your neighbors, discover local services, and build a stronger community together.
+          </p>
+
+          <div className="start-buttons">
+            <button 
+              className="start-button primary"
+              onClick={() => navigate("/signin")}
+            >
+              Sign In
+            </button>
+            
+            <button 
+              className="start-button secondary"
+              onClick={() => navigate("/listings")}
+            >
+              Browse Listings
+            </button>
+            
+            <button 
+              className="start-button secondary"
+              onClick={() => navigate("/create")}
+            >
+              Create Listing
+            </button>
+          </div>
+
+          <div className="start-footer">
+            <p className="signup-prompt">
+              New to GoodNeighbor?{' '}
+              <button 
+                className="signup-link"
+                onClick={() => navigate("/signup")}
+              >
+                Create an account
+              </button>
+            </p>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-export default StartPage
+export default StartPage;
