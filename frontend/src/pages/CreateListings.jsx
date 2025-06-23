@@ -1,9 +1,12 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./CreateListings.css";
 
 const categories = ["Books & Media", "Electronics", "Toys & Games", "Sports & Outdoors", "Home & Garden", "Office & School Supplies", "Vehicles & Parts", "Baby & Kids"];
 
 function CreateListing({ onCreate }){
+    const navigate = useNavigate();
+
     const [form, setForm] = useState({
         title: "",
         image: "",
@@ -120,13 +123,12 @@ function CreateListing({ onCreate }){
         navigate('/');
     };
 
-
     return (
         <div className="create-listing-page">
             <div className="create-listing-container">
                 <button onClick={handleBackToStart} className="back-to-start-btn">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M12 19-7-7 7-7"/>
+                        <path d="m12 19-7-7 7-7"/>
                         <path d="M19 12H5"/>
                     </svg>
                     Back to Home
