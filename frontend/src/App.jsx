@@ -8,7 +8,7 @@ import CreateListings from './pages/CreateListings';
 
 function App() {
   return (
-    <Router>
+    <Router basename = "/GoodNeighbor">
       <Routes>
         <Route path="/" element={<StartPage />} />
         <Route path="/signin" element={<SignIn />} />

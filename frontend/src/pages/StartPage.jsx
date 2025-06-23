@@ -28,14 +28,14 @@ function StartPage() {
             
             <button 
               className="start-button secondary"
-              onClick={() => navigate("/listings")}
+              onClick={() => navigate("/listingspage")}
             >
               Browse Listings
             </button>
             
             <button 
               className="start-button secondary"
-              onClick={() => navigate("/create")}
+              onClick={() => navigate("/createlistings")}
             >
               Create Listing
             </button>

@@ -9,15 +9,16 @@ function CreateListing({ onCreate }){
         image: "",
         location: "",
         category: categories[0],
-        condition: "",
+        condition: "Good",
         description: ""
     });
 
     const [imagePreview, setImagePreview] = useState(null);
     const [isSubmitted, setIsSubmitted] = useState(false);
-    const [error, setError] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errors, setErrors] = useState({}); 
 
-    const handleChange = (e) => {
+    const handleInputChange = (e) => {
         const { name, value } = e.target;
         setForm({ ...form, [name]: value });
 
@@ -30,11 +31,11 @@ function CreateListing({ onCreate }){
         const file = e.target.files[0];
         if (file) {
             if (!file.type.startsWith("image/")) {
-                setError(prev => ({ ...prev, image: "Invalid file type. Please select an image."}));
+                setErrors(prev => ({ ...prev, image: "Invalid file type. Please select an image."})); 
                 return;
             }
-            if(file.size >5*1024*1024) {
-                setError(prev => ({ ...prev, image: "File size exceeds the limit of 5MB."}));
+            if(file.size > 5*1024*1024) {
+                setErrors(prev => ({ ...prev, image: "File size exceeds the limit of 5MB."})); 
                 return;
             }
             const reader = new FileReader();
@@ -66,7 +67,7 @@ function CreateListing({ onCreate }){
             isValid = false;
         }
         if (!form.description) {
-            newErrors.condition = "Description is required.";
+            newErrors.description = "Description is required."; 
             isValid = false;
         }
         if (!form.image) {
@@ -79,22 +80,21 @@ function CreateListing({ onCreate }){
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (validateForm()) {
+        if (!validateForm()) { 
             return;
         }
-        setIsSubmitted(true);
+        setIsSubmitting(true);
         try{
             const newListing = {
                 ...form,
                 id: Date.now(),
                 datePosted: new Date().toISOString(),
-                status: "avaliable"
+                status: "available"
             };       
             if (onCreate) {
                 await onCreate(newListing);
             }
 
-            // Reset form after successful submission
             setForm({
                 title: "",
                 description: "",
@@ -103,7 +103,8 @@ function CreateListing({ onCreate }){
                 category: categories[0],
                 condition: "Good"
             });
-            setImagePreview("");
+            setImagePreview(null);
+            setErrors({});
             
             alert("Listing created successfully!");
             
@@ -184,6 +185,7 @@ function CreateListing({ onCreate }){
                         value={form.condition}
                         onChange={handleInputChange}
                     >
+                        <option value="">Select condition</option>
                         <option value="Like New">Like New</option>
                         <option value="Good">Good</option>
                         <option value="Fair">Fair</option>
@@ -227,7 +229,7 @@ function CreateListing({ onCreate }){
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        setImagePreview("");
+                                        setImagePreview(null);
                                         setForm(prev => ({ ...prev, image: "" }));
                                     }}
                                     className="remove-image-btn"
