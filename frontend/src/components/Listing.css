@@ -1,0 +1,248 @@
+.listing-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.listing-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.listing-image-container {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    background-color: #f0f2f5;
+}
+
+.listing-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s;
+    opacity: 0;
+}
+
+.listing-image.loaded {
+    opacity: 1;
+}
+
+.image-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #f0f2f5;
+    color: #65676b;
+}
+
+.image-placeholder.no-image {
+    position: static;
+}
+
+.image-placeholder svg {
+    margin-bottom: 8px;
+}
+
+.loading-spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #e4e6ea;
+    border-top: 2px solid #1877f2;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.status-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-available {
+    background-color: #42b883;
+    color: white;
+}
+
+.status-pending {
+    background-color: #f39c12;
+    color: white;
+}
+
+.status-taken {
+    background-color: #95a5a6;
+    color: white;
+}
+
+.favorite-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #65676b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.favorite-btn:hover {
+    background-color: white;
+    color: #e41e3f;
+    transform: scale(1.1);
+}
+
+.favorite-btn.favorited {
+    color: #e41e3f;
+    background-color: white;
+}
+
+.listing-content {
+    padding: 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.listing-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1c1e21;
+    margin: 0 0 8px 0;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.listing-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+
+.listing-category {
+    color: #1877f2;
+    font-weight: 500;
+}
+
+.meta-separator {
+    color: #bcc0c4;
+}
+
+.condition-badge {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.condition-like-new {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.condition-good {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.condition-fair {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.condition-poor {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.listing-description {
+    color: #65676b;
+    font-size: 14px;
+    line-height: 1.4;
+    margin: 0 0 12px 0;
+    flex: 1;
+}
+
+.listing-footer {
+    margin-top: auto;
+}
+
+.location-date {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #65676b;
+    margin-bottom: 12px;
+}
+
+.listing-location {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.listing-location svg {
+    flex-shrink: 0;
+}
+
+.listing-date {
+    flex-shrink: 0;
+}
+
+.listing-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.contact-btn,
+.share-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.contact-btn.primary {
+    background-color: #1877f2;
+}
