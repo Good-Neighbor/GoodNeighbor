@@ -4,6 +4,8 @@ import "./CreateListings.css";
 const categories = ["Books & Media", "Electronics", "Toys & Games", "Sports & Outdoors", "Home & Garden", "Office & School Supplies", "Vehicles & Parts", "Baby & Kids"];
 
 function CreateListing({ onCreate }){
+    const navigate = useNavigate();
+
     const [form, setForm] = useState({
         title: "",
         image: "",
@@ -119,7 +121,6 @@ function CreateListing({ onCreate }){
     const handleBackToStart = () => {
         navigate('/');
     };
-
 
     return (
         <div className="create-listing-page">
