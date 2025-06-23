@@ -243,27 +243,36 @@ function ListingsPage({ listings = [], onContact, onFavorite, onShare, favorites
             </div>
 
             {/* Results Summary */}
-            <div className="results-summary">
-                <span className="results-count">
-                    {filteredAndSortedListings.length} item{filteredAndSortedListings.length !== 1 ? 's' : ''} found
-                </span>
-                {(selectedCategory !== "All" || searchQuery) && (
-                    <div className="active-filters">
-                        {selectedCategory !== "All" && (
-                            <span className="filter-tag">
-                                {selectedCategory}
-                                <button onClick={() => setSelectedCategory("All")}>×</button>
-                            </span>
-                        )}
-                        {searchQuery && (
-                            <span className="filter-tag">
-                                "{searchQuery}"
-                                <button onClick={() => setSearchQuery("")}>×</button>
-                            </span>
-                        )}
-                    </div>
-                )}
-            </div>
+            {(filteredAndSortedListings.length > 0 || selectedCategory !== "All" || searchQuery) && (
+              <div className="results-summary">
+                  {filteredAndSortedListings.length > 0 && (
+                    <>
+                      <span className="results-count-badge">
+                        {filteredAndSortedListings.length}
+                      </span>
+                      <span className="results-count-text">
+                        {filteredAndSortedListings.length === 1 ? 'item found' : 'items found'}
+                      </span>
+                    </>
+                  )}
+                  {(selectedCategory !== "All" || searchQuery) && (
+                      <div className="active-filters">
+                          {selectedCategory !== "All" && (
+                              <span className="filter-tag">
+                                  {selectedCategory}
+                                  <button onClick={() => setSelectedCategory("All")}>×</button>
+                              </span>
+                          )}
+                          {searchQuery && (
+                              <span className="filter-tag">
+                                  "{searchQuery}"
+                                  <button onClick={() => setSearchQuery("")}>×</button>
+                              </span>
+                          )}
+                      </div>
+                  )}
+              </div>
+            )}
 
             {/* Listings Grid/List */}
             <div className="listings-container">
@@ -289,22 +298,28 @@ function ListingsPage({ listings = [], onContact, onFavorite, onShare, favorites
                     </div>
                 ) : (
                     <div className="no-results">
-                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <div className="no-results-icon">
+                          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                             <circle cx="11" cy="11" r="8"/>
-                            <path d="21 21l-4.35-4.35"/>
-                        </svg>
-                        <h3>No items found</h3>
-                        <p>
-                            {searchQuery || selectedCategory !== "All" 
-                                ? "Try adjusting your search or filters" 
-                                : "No listings available at the moment"
-                            }
+                            <path d="M21 21l-4.35-4.35"/>
+                          </svg>
+                        </div>
+                        <h2 className="no-results-title">No items found</h2>
+                        <p className="no-results-message">
+                          {searchQuery || selectedCategory !== "All" 
+                            ? "Try adjusting your search or filters."
+                            : "There are no listings available at the moment. Be the first to share something with your community!"}
                         </p>
-                        {(searchQuery || selectedCategory !== "All") && (
+                        <div className="no-results-actions">
+                          {(searchQuery || selectedCategory !== "All") && (
                             <button className="clear-filters-btn" onClick={clearFilters}>
-                                Clear Filters
+                              Clear Filters
                             </button>
-                        )}
+                          )}
+                          <button className="create-listing-cta" onClick={() => navigate('/createlistings')}>
+                            + Create a Listing
+                          </button>
+                        </div>
                     </div>
                 )}
             </div>

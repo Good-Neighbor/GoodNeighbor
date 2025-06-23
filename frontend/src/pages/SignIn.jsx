@@ -31,8 +31,21 @@ function SignIn() {
     }
   };
 
+  const handleBackToStart = () => {
+    navigate('/');
+  };
+
   return (
     <div className="signin-container">
+      <div className="back-button-container">
+        <button onClick={handleBackToStart} className="back-to-start-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 19L5 12L12 5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M19 12H5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Back to Home
+        </button>
+      </div>
       <div className="signin-card">
         <div className="signin-header">
           <h1 className="signin-title">Welcome Back</h1>
