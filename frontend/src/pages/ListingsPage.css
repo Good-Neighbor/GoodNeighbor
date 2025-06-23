@@ -113,126 +113,406 @@ html, body, #root {
   color: #6b7280;
 }
 
+/* Filter toggle button - hidden on desktop, shown on mobile */
 .filter-toggle {
-  display: none;
+  display: none !important;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.875rem 1rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  background: white;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
-  transition: all 0.2s ease;
+  padding: 0.875rem 1rem !important;
+  border: 2px solid #e5e7eb !important;
+  border-radius: 12px !important;
+  background: white !important;
+  cursor: pointer !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  color: #667eea !important;
+  transition: all 0.2s ease !important;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
 }
 
 .filter-toggle:hover {
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #667eea !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.1) !important;
+  color: #667eea !important;
+  background: white !important;
+  outline: none !important;
 }
 
+.filter-toggle:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  border-color: #667eea !important;
+}
+
+/* Desktop filters - shown inline on desktop */
+.desktop-filters {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Mobile filters panel - hidden by default */
+.filters-panel {
+  display: none;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1.5rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.filters-panel.show {
+  display: block;
+}
+
+.filter-section {
+  margin-bottom: 1.5rem;
+}
+
+.filter-section:last-child {
+  margin-bottom: 0;
+}
+
+.filter-section h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0 0 0.75rem 0;
+}
+
+/* Reset all button styling first */
+.listings-controls button,
+.controls-container button,
+button {
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+}
+
+.listings-controls button:focus,
+.controls-container button:focus,
+button:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+}
+
+/* Fixed view mode toggle */
 .view-mode-toggle {
   display: flex;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  overflow: hidden;
-  background: white;
+  gap: 0.5rem;
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .view-btn {
-  padding: 0.875rem 1rem;
-  border: none;
-  background: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  color: #6b7280;
+  padding: 0.875rem 1rem !important;
+  border: 2px solid #e5e7eb !important;
+  background: white !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+  color: #667eea !important;
+  font-weight: 500 !important;
+  border-radius: 12px !important;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
 }
 
 .view-btn:hover {
-  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-  color: #374151;
+  border-color: #667eea !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.1) !important;
+  color: #667eea !important;
+  background: white !important;
+  outline: none !important;
+}
+
+.view-btn:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  border-color: #667eea !important;
 }
 
 .view-btn.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  border-color: #667eea !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-.listings-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
+.view-btn.active:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
 }
 
-.listings-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1rem;
+.view-btn svg,
+.view-btn i,
+.view-btn * {
+  color: inherit !important;
 }
 
-.listing-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.listing-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-}
-
-.listing-image {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-}
-
-.listing-content {
-  padding: 1.5rem;
-}
-
-.listing-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #1a202c;
-  margin: 0 0 0.5rem 0;
-  line-height: 1.4;
-}
-
-.listing-description {
-  color: #6b7280;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  margin: 0 0 1rem 0;
-}
-
-.listing-meta {
+/* Category filter buttons styling */
+.category-filters,
+.filters-container,
+.category-buttons {
   display: flex;
-  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
   align-items: center;
-  font-size: 0.75rem;
-  color: #9ca3af;
 }
 
-.listing-category {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-weight: 500;
+.category-filter-btn,
+.category-btn,
+.filter-btn,
+button[class*="category"],
+button[class*="filter"]:not(.clear-filters-btn) {
+  padding: 0.5rem 1rem !important;
+  border: 2px solid #e5e7eb !important;
+  border-radius: 12px !important;
+  background: white !important;
+  color: #667eea !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  text-decoration: none !important;
+  display: inline-block !important;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
 }
 
-.no-listings {
-  text-align: center;
+.category-filter-btn:hover,
+.category-btn:hover,
+.filter-btn:hover,
+button[class*="category"]:hover,
+button[class*="filter"]:not(.clear-filters-btn):hover {
+  border-color: #667eea !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.1) !important;
+  color: #667eea !important;
+  background: white !important;
+  outline: none !important;
+}
+
+.category-filter-btn:focus,
+.category-btn:focus,
+.filter-btn:focus,
+button[class*="category"]:focus,
+button[class*="filter"]:not(.clear-filters-btn):focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  border-color: #667eea !important;
+}
+
+.category-filter-btn.active,
+.category-btn.active,
+.filter-btn.active,
+button[class*="category"].active,
+button[class*="filter"].active:not(.clear-filters-btn) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  border-color: #667eea !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.category-filter-btn.active:focus,
+.category-btn.active:focus,
+.filter-btn.active:focus,
+button[class*="category"].active:focus,
+button[class*="filter"].active:not(.clear-filters-btn):focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+}
+
+/* Clear all filters button and close buttons */
+.clear-filters-btn,
+.close-btn,
+.remove-btn,
+button[class*="clear"],
+button[class*="close"],
+button[class*="remove"] {
+  padding: 0.5rem 1rem !important;
+  border: 2px solid #e5e7eb !important;
+  border-radius: 12px !important;
+  background: white !important;
+  color: #667eea !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+}
+
+.clear-filters-btn:hover,
+.close-btn:hover,
+.remove-btn:hover,
+button[class*="clear"]:hover,
+button[class*="close"]:hover,
+button[class*="remove"]:hover {
+  border-color: #667eea !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.1) !important;
+  color: #667eea !important;
+  background: white !important;
+  outline: none !important;
+}
+
+.clear-filters-btn:focus,
+.close-btn:focus,
+.remove-btn:focus,
+button[class*="clear"]:focus,
+button[class*="close"]:focus,
+button[class*="remove"]:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  border-color: #667eea !important;
+}
+
+/* Fixed sort dropdown styling */
+.sort-dropdown,
+.sort-select,
+select[class*="sort"],
+select {
+  padding: 0.875rem 1rem !important;
+  border: 2px solid #e5e7eb !important;
+  border-radius: 12px !important;
+  background: white !important;
+  color: #667eea !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.sort-dropdown:hover,
+.sort-select:hover,
+select[class*="sort"]:hover,
+select:hover {
+  border-color: #667eea !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.1) !important;
+  color: #667eea !important;
+  background: white !important;
+  outline: none !important;
+}
+
+.sort-dropdown:focus,
+.sort-select:focus,
+select[class*="sort"]:focus,
+select:focus {
+  outline: none !important;
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+  color: #667eea !important;
+  background: white !important;
+}
+
+.back-to-start-btn {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding: 0.75rem 1rem !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 12px !important;
+  color: #667eea !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  text-decoration: none !important;
+  outline: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  z-index: 1000;
+}
+
+.back-to-start-btn:hover {
+  background: white !important;
+  border-color: #667eea !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2) !important;
+  color: #667eea !important;
+}
+
+.back-to-start-btn:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1), 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  border-color: #667eea !important;
+}
+
+.back-to-start-btn svg {
+  color: inherit !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .back-to-start-btn {
+    top: 1rem;
+    left: 1rem;
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+  
+  .back-to-start-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .back-to-start-btn {
+    position: relative;
+    top: 0;
+    left: 0;
+    margin-bottom: 1rem;
+    align-self: flex-start;
+  }
+  
+  .create-listing-container,
+  .listings-header {
+    position: relative;
+    padding-top: 1rem;
+  }
 }

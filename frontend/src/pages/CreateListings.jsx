@@ -117,142 +117,151 @@ function CreateListing({ onCreate }){
     };
 
     return (
-        <div className="create-listing-container">
-            <div className="create-listing-header">
-                <h1>Create New Listing</h1>
-                <p>Share items you no longer need with your community - completely free!</p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="create-listing-form">
-                {/* Title */}
-                <div className="form-group">
-                    <label htmlFor="title">Title *</label>
-                    <input
-                        type="text"
-                        id="title"
-                        name="title"
-                        value={form.title}
-                        onChange={handleInputChange}
-                        placeholder="What are you giving away?"
-                        maxLength="100"
-                        className={errors.title ? "error" : ""}
-                    />
-                    {errors.title && <span className="error-message">{errors.title}</span>}
+        <div className="create-listing-page">
+            <div className="create-listing-container">
+                <button onClick={handleBackToStart} className="back-to-start-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12 19-7-7 7-7"/>
+                        <path d="M19 12H5"/>
+                    </svg>
+                    Back to Home
+                </button>
+                <div className="create-listing-header">
+                    <h1>Create New Listing</h1>
+                    <p>Share items you no longer need with your community - completely free!</p>
                 </div>
 
-                {/* Description */}
-                <div className="form-group">
-                    <label htmlFor="description">Description *</label>
-                    <textarea
-                        id="description"
-                        name="description"
-                        value={form.description}
-                        onChange={handleInputChange}
-                        placeholder="Describe the item's condition, any flaws, pickup instructions, etc."
-                        rows="4"
-                        maxLength="500"
-                        className={errors.description ? "error" : ""}
-                    />
-                    <div className="character-count">
-                        {form.description.length}/500
-                    </div>
-                    {errors.description && <span className="error-message">{errors.description}</span>}
-                </div>
-
-                {/* Category */}
-                <div className="form-group">
-                    <label htmlFor="category">Category</label>
-                    <select
-                        id="category"
-                        name="category"
-                        value={form.category}
-                        onChange={handleInputChange}
-                    >
-                        {categories.map(category => (
-                            <option key={category} value={category}>
-                                {category}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                {/* Condition */}
-                <div className="form-group">
-                    <label htmlFor="condition">Condition</label>
-                    <select
-                        id="condition"
-                        name="condition"
-                        value={form.condition}
-                        onChange={handleInputChange}
-                    >
-                        <option value="">Select condition</option>
-                        <option value="Like New">Like New</option>
-                        <option value="Good">Good</option>
-                        <option value="Fair">Fair</option>
-                        <option value="Poor">Poor</option>
-                    </select>
-                </div>
-
-                {/* Location */}
-                <div className="form-group">
-                    <label htmlFor="location">Pickup Location *</label>
-                    <input
-                        type="text"
-                        id="location"
-                        name="location"
-                        value={form.location}
-                        onChange={handleInputChange}
-                        placeholder="City, State or general area"
-                        className={errors.location ? "error" : ""}
-                    />
-                    {errors.location && <span className="error-message">{errors.location}</span>}
-                </div>
-
-                {/* Image Upload */}
-                <div className="form-group">
-                    <label htmlFor="image">Photos *</label>
-                    <div className="image-upload-container">
+                <form onSubmit={handleSubmit} className="create-listing-form">
+                    {/* Title */}
+                    <div className="form-group">
+                        <label htmlFor="title">Title *</label>
                         <input
-                            type="file"
-                            id="image"
-                            accept="image/*"
-                            onChange={handleImageChange}
-                            className="image-input"
+                            type="text"
+                            id="title"
+                            name="title"
+                            value={form.title}
+                            onChange={handleInputChange}
+                            placeholder="What are you giving away?"
+                            maxLength="100"
+                            className={errors.title ? "error" : ""}
                         />
-                        <label htmlFor="image" className="image-upload-label">
-                            {imagePreview ? "Change Photo" : "Add Photo"}
-                        </label>
-                        
-                        {imagePreview && (
-                            <div className="image-preview">
-                                <img src={imagePreview} alt="Preview" />
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setImagePreview(null);
-                                        setForm(prev => ({ ...prev, image: "" }));
-                                    }}
-                                    className="remove-image-btn"
-                                >
-                                    Remove
-                                </button>
-                            </div>
-                        )}
+                        {errors.title && <span className="error-message">{errors.title}</span>}
                     </div>
-                    {errors.image && <span className="error-message">{errors.image}</span>}
-                </div>
 
-                {/* Submit Button */}
-                <div className="form-actions">
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="submit-btn"
-                    >
-                        {isSubmitting ? "Creating Listing..." : "Create Listing"}
-                    </button>
-                </div>
-            </form>
+                    {/* Description */}
+                    <div className="form-group">
+                        <label htmlFor="description">Description *</label>
+                        <textarea
+                            id="description"
+                            name="description"
+                            value={form.description}
+                            onChange={handleInputChange}
+                            placeholder="Describe the item's condition, any flaws, pickup instructions, etc."
+                            rows="4"
+                            maxLength="500"
+                            className={errors.description ? "error" : ""}
+                        />
+                        <div className="character-count">
+                            {form.description.length}/500
+                        </div>
+                        {errors.description && <span className="error-message">{errors.description}</span>}
+                    </div>
+
+                    {/* Category */}
+                    <div className="form-group">
+                        <label htmlFor="category">Category</label>
+                        <select
+                            id="category"
+                            name="category"
+                            value={form.category}
+                            onChange={handleInputChange}
+                        >
+                            {categories.map(category => (
+                                <option key={category} value={category}>
+                                    {category}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Condition */}
+                    <div className="form-group">
+                        <label htmlFor="condition">Condition</label>
+                        <select
+                            id="condition"
+                            name="condition"
+                            value={form.condition}
+                            onChange={handleInputChange}
+                        >
+                            <option value="">Select condition</option>
+                            <option value="Like New">Like New</option>
+                            <option value="Good">Good</option>
+                            <option value="Fair">Fair</option>
+                            <option value="Poor">Poor</option>
+                        </select>
+                    </div>
+
+                    {/* Location */}
+                    <div className="form-group">
+                        <label htmlFor="location">Pickup Location *</label>
+                        <input
+                            type="text"
+                            id="location"
+                            name="location"
+                            value={form.location}
+                            onChange={handleInputChange}
+                            placeholder="City, State or general area"
+                            className={errors.location ? "error" : ""}
+                        />
+                        {errors.location && <span className="error-message">{errors.location}</span>}
+                    </div>
+
+                    {/* Image Upload */}
+                    <div className="form-group">
+                        <label htmlFor="image">Photos *</label>
+                        <div className="image-upload-container">
+                            <input
+                                type="file"
+                                id="image"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                                className="image-input"
+                            />
+                            <label htmlFor="image" className="image-upload-label">
+                                {imagePreview ? "Change Photo" : "Add Photo"}
+                            </label>
+                            
+                            {imagePreview && (
+                                <div className="image-preview">
+                                    <img src={imagePreview} alt="Preview" />
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setImagePreview(null);
+                                            setForm(prev => ({ ...prev, image: "" }));
+                                        }}
+                                        className="remove-image-btn"
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                        {errors.image && <span className="error-message">{errors.image}</span>}
+                    </div>
+
+                    {/* Submit Button */}
+                    <div className="form-actions">
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="submit-btn"
+                        >
+                            {isSubmitting ? "Creating Listing..." : "Create Listing"}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 }

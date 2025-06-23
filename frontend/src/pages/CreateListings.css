@@ -6,14 +6,40 @@ html, body, #root {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
 }
 
+html {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+body {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 .create-listing-page {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 2rem;
   box-sizing: border-box;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .create-listing-container {
@@ -25,6 +51,8 @@ html, body, #root {
   width: 100%;
   max-width: 600px;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  margin: 0 auto;
+  position: relative;
 }
 
 .create-listing-header {
@@ -76,6 +104,8 @@ html, body, #root {
   transition: all 0.2s ease;
   background: white;
   color: #1f2937;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .form-group input:focus,
@@ -122,6 +152,7 @@ html, body, #root {
   color: #dc2626;
   font-size: 0.75rem;
   font-weight: 500;
+  margin-top: 0.25rem;
 }
 
 .image-upload-container {
@@ -146,6 +177,8 @@ html, body, #root {
   color: #667eea;
   font-weight: 600;
   font-size: 0.875rem;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .image-upload-label:hover {
@@ -161,6 +194,7 @@ html, body, #root {
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  align-self: center;
 }
 
 .image-preview img {
@@ -210,6 +244,7 @@ html, body, #root {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .submit-btn:hover:not(:disabled) {
@@ -232,10 +267,13 @@ html, body, #root {
 @media (max-width: 768px) {
   .create-listing-page {
     padding: 1rem;
+    align-items: flex-start;
+    padding-top: 2rem;
   }
   
   .create-listing-container {
     padding: 2rem 1.5rem;
+    margin: 0;
   }
   
   .create-listing-header h1 {
@@ -245,7 +283,100 @@ html, body, #root {
   .form-group input,
   .form-group textarea,
   .form-group select {
-    font-size: 16px; /* Prevents zoom on iOS */
+    font-size: 16px; 
   }
 }
+
+@media (max-width: 480px) {
+  .create-listing-page {
+    padding: 0.5rem;
+    padding-top: 1rem;
+  }
+  
+  .create-listing-container {
+    padding: 1.5rem 1rem;
+    border-radius: 16px;
+  }
+  
+  .create-listing-header h1 {
+    font-size: 1.5rem;
+  }
+}
+
+.back-to-start-btn {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding: 0.75rem 1rem !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 12px !important;
+  color: #667eea !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  text-decoration: none !important;
+  outline: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  z-index: 1000;
+}
+
+.back-to-start-btn:hover {
+  background: white !important;
+  border-color: #667eea !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2) !important;
+  color: #667eea !important;
+}
+
+.back-to-start-btn:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1), 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  border-color: #667eea !important;
+}
+
+.back-to-start-btn svg {
+  color: inherit !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .back-to-start-btn {
+    top: 1rem;
+    left: 1rem;
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+  
+  .back-to-start-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .back-to-start-btn {
+    position: relative;
+    top: 0;
+    left: 0;
+    margin-bottom: 1rem;
+    align-self: flex-start;
+  }
+  
+  .create-listing-container,
+  .listings-header {
+    position: relative;
+    padding-top: 1rem;
+  }
+}
+
+
 

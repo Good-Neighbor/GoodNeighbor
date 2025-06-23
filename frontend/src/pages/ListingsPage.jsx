@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import Listing from "../components/Listing";
 import "./ListingsPage.css";
 
@@ -106,10 +107,23 @@ function ListingsPage({ listings = [], onContact, onFavorite, onShare, favorites
         }
     };
 
+    const navigate = useNavigate();
+
+    const handleBackToStart = () => {
+        navigate('/');
+    };
+
     return (
         <div className="listings-page">
             {/* Header */}
             <div className="listings-header">
+                <button onClick={handleBackToStart} className="back-to-start-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12 19-7-7 7-7"/>
+                        <path d="M19 12H5"/>
+                    </svg>
+                    Back to Home
+                </button>
                 <div className="header-content">
                     <h1>Free Items Marketplace</h1>
                     <p>Find free items in your community</p>
