@@ -116,6 +116,11 @@ function CreateListing({ onCreate }){
         }
     };
 
+    const handleBackToStart = () => {
+        navigate('/');
+    };
+
+
     return (
         <div className="create-listing-page">
             <div className="create-listing-container">
