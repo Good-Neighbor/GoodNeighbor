@@ -9,15 +9,12 @@ function CreateListing({ onCreate }){
 
     const [form, setForm] = useState({
         title: "",
-        image: "",
         location: "",
         category: categories[0],
         condition: "Good",
         description: ""
     });
 
-    const [imagePreview, setImagePreview] = useState(null);
-    const [isSubmitted, setIsSubmitted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState({}); 
 
@@ -27,26 +24,6 @@ function CreateListing({ onCreate }){
 
         if (errors[name]) {
             setErrors( prev => ({ ...prev, [name]: ""}));
-        }
-    };
-
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            if (!file.type.startsWith("image/")) {
-                setErrors(prev => ({ ...prev, image: "Invalid file type. Please select an image."})); 
-                return;
-            }
-            if(file.size > 5*1024*1024) {
-                setErrors(prev => ({ ...prev, image: "File size exceeds the limit of 5MB."})); 
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = () => {
-                setImagePreview(reader.result);
-                setForm(prev => ({ ...prev, image: reader.result}));
-            };
-            reader.readAsDataURL(file);
         }
     };
 
@@ -73,10 +50,6 @@ function CreateListing({ onCreate }){
             newErrors.description = "Description is required."; 
             isValid = false;
         }
-        if (!form.image) {
-            newErrors.image = "Image is required.";
-            isValid = false;
-        }
         setErrors(newErrors);
         return isValid;
     };
@@ -90,10 +63,10 @@ function CreateListing({ onCreate }){
         try{
             const newListing = {
                 ...form,
-                id: Date.now(),
                 datePosted: new Date().toISOString(),
                 status: "available"
             };       
+            
             if (onCreate) {
                 await onCreate(newListing);
             }
@@ -101,15 +74,14 @@ function CreateListing({ onCreate }){
             setForm({
                 title: "",
                 description: "",
-                image: "",
                 location: "",
                 category: categories[0],
                 condition: "Good"
             });
-            setImagePreview(null);
             setErrors({});
             
             alert("Listing created successfully!");
+            navigate('/listingspage');
             
         } catch (error) {
             console.error("Error creating listing:", error);
@@ -128,7 +100,7 @@ function CreateListing({ onCreate }){
             <div className="create-listing-container">
                 <button onClick={handleBackToStart} className="back-to-start-btn">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="m12 19-7-7 7-7"/>
+                        <path d="M12 19-7-7 7-7"/>
                         <path d="M19 12H5"/>
                     </svg>
                     Back to Home
@@ -221,40 +193,6 @@ function CreateListing({ onCreate }){
                             className={errors.location ? "error" : ""}
                         />
                         {errors.location && <span className="error-message">{errors.location}</span>}
-                    </div>
-
-                    {/* Image Upload */}
-                    <div className="form-group">
-                        <label htmlFor="image">Photos *</label>
-                        <div className="image-upload-container">
-                            <input
-                                type="file"
-                                id="image"
-                                accept="image/*"
-                                onChange={handleImageChange}
-                                className="image-input"
-                            />
-                            <label htmlFor="image" className="image-upload-label">
-                                {imagePreview ? "Change Photo" : "Add Photo"}
-                            </label>
-                            
-                            {imagePreview && (
-                                <div className="image-preview">
-                                    <img src={imagePreview} alt="Preview" />
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setImagePreview(null);
-                                            setForm(prev => ({ ...prev, image: "" }));
-                                        }}
-                                        className="remove-image-btn"
-                                    >
-                                        Remove
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                        {errors.image && <span className="error-message">{errors.image}</span>}
                     </div>
 
                     {/* Submit Button */}

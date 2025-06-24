@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut, sendEmailVerification } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import { useNavigate } from 'react-router-dom';
 import './SignIn.css';
@@ -9,23 +9,54 @@ function SignIn() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showResend, setShowResend] = useState(false);
+  const [resendMessage, setResendMessage] = useState('');
 
   const handleChange = (e) => {
     setFormData({...formData, [e.target.name]: e.target.value});
-    // Clear error when user starts typing
+    // Clear error and resend state when user starts typing
     if (error) setError('');
+    if (showResend) setShowResend(false);
+    if (resendMessage) setResendMessage('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
+    setShowResend(false);
+    setResendMessage('');
 
     try {
-      await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      navigate('/listings');
+      const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      const user = userCredential.user;
+      if (!user.emailVerified) {
+        setError('Please verify your email before signing in.');
+        setShowResend(true);
+        await signOut(auth);
+        setIsLoading(false);
+        return;
+      }
+      navigate('/listingspage');
     } catch (err) {
       setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setResendMessage('');
+    setIsLoading(true);
+    try {
+      // Sign in silently to get the user object
+      const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      const user = userCredential.user;
+      await sendEmailVerification(user);
+      setResendMessage('Verification email sent! Please check your inbox.');
+      await signOut(auth);
+    } catch (err) {
+      setResendMessage('Failed to send verification email. Please check your credentials and try again.');
     } finally {
       setIsLoading(false);
     }
@@ -85,6 +116,21 @@ function SignIn() {
             <div className="error-message">
               <span className="error-icon">⚠️</span>
               {error}
+            </div>
+          )}
+
+          {showResend && (
+            <div style={{ marginBottom: '1rem', textAlign: 'center' }}>
+              <button
+                type="button"
+                className="signin-button"
+                style={{ background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)', marginBottom: '0.5rem' }}
+                onClick={handleResendVerification}
+                disabled={isLoading}
+              >
+                {isLoading ? 'Sending...' : 'Resend Verification Email'}
+              </button>
+              {resendMessage && <div style={{ color: '#667eea', fontWeight: 500 }}>{resendMessage}</div>}
             </div>
           )}
 

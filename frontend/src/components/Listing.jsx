@@ -6,12 +6,16 @@ function Listing({
     onContact, 
     onFavorite, 
     onShare, 
+    onMatch,
+    onClaim,
     showActions = true,
     isFavorited = false,
     currentUserId = null 
 }) {
-    const [imageLoaded, setImageLoaded] = useState(false);
-    const [imageError, setImageError] = useState(false);
+    // const [imageLoaded, setImageLoaded] = useState(false);
+    // const [imageError, setImageError] = useState(false);
+    const [showContactPopup, setShowContactPopup] = useState(false);
+    const [selectedRequestor, setSelectedRequestor] = useState(null);
 
     // Format date for display
     const formatDate = (dateString) => {
@@ -54,22 +58,22 @@ function Listing({
         switch (status?.toLowerCase()) {
             case 'available':
                 return 'status-available';
-            case 'pending':
-                return 'status-pending';
-            case 'taken':
-                return 'status-taken';
+            case 'matched':
+                return 'status-matched';
+            case 'claimed':
+                return 'status-claimed';
             default:
                 return 'status-available';
         }
     };
 
-    const handleImageError = () => {
-        setImageError(true);
-    };
+    // const handleImageError = () => {
+    //     setImageError(true);
+    // };
 
-    const handleImageLoad = () => {
-        setImageLoaded(true);
-    };
+    // const handleImageLoad = () => {
+    //     setImageLoaded(true);
+    // };
 
     const handleContact = (e) => {
         e.stopPropagation();
@@ -92,14 +96,45 @@ function Listing({
         }
     };
 
+    const handleMatch = (e, requestor) => {
+        e.stopPropagation();
+        if (onMatch) {
+            onMatch(listing.id, requestor);
+        }
+    };
+
+    const handleClaim = (e) => {
+        e.stopPropagation();
+        if (onClaim) {
+            onClaim(listing.id);
+        }
+    };
+
+    const showRequestorContact = (e, requestor) => {
+        e.stopPropagation();
+        setSelectedRequestor(requestor);
+        setShowContactPopup(true);
+    };
+
+    const closeContactPopup = () => {
+        setShowContactPopup(false);
+        setSelectedRequestor(null);
+    };
+
     // Check if listing is from current user
     const isOwnListing = currentUserId && listing.userId === currentUserId;
+
+    // Check if current user has already requested this item
+    const hasRequested = (listing.requestors || []).some(req => req.userId === currentUserId);
+
+    // Get request count
+    const requestCount = (listing.requestors || []).length;
 
     return (
         <div className="listing-card">
             {/* Image Section */}
             <div className="listing-image-container">
-                {!imageError && listing.image ? (
+                {/* {!imageError && listing.image ? (
                     <>
                         <img
                             src={listing.image}
@@ -114,7 +149,7 @@ function Listing({
                             </div>
                         )}
                     </>
-                ) : (
+                ) : ( */}
                     <div className="image-placeholder no-image">
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
@@ -123,12 +158,19 @@ function Listing({
                         </svg>
                         <span>No Image</span>
                     </div>
-                )}
+                {/* )} */}
 
                 {/* Status Badge */}
                 <div className={`status-badge ${getStatusClass(listing.status)}`}>
                     {listing.status || 'Available'}
                 </div>
+
+                {/* Request Count Badge (for own listings) */}
+                {isOwnListing && requestCount > 0 && (
+                    <div className="request-count-badge">
+                        {requestCount} request{requestCount !== 1 ? 's' : ''}
+                    </div>
+                )}
 
                 {/* Favorite Button */}
                 {showActions && !isOwnListing && (
@@ -191,7 +233,7 @@ function Listing({
                 {/* Action Buttons */}
                 {showActions && (
                     <div className="listing-actions">
-                        {!isOwnListing && listing.status === 'available' && (
+                        {!isOwnListing && listing.status === 'available' && !hasRequested && (
                             <button 
                                 className="contact-btn primary"
                                 onClick={handleContact}
@@ -202,6 +244,10 @@ function Listing({
                                 </svg>
                                 Contact
                             </button>
+                        )}
+
+                        {!isOwnListing && hasRequested && (
+                            <span className="requested-indicator">Requested</span>
                         )}
                         
                         <button 
@@ -224,6 +270,21 @@ function Listing({
                     </div>
                 )}
             </div>
+
+            {/* Contact Info Popup */}
+            {showContactPopup && selectedRequestor && (
+                <div className="contact-popup-overlay" onClick={closeContactPopup}>
+                    <div className="contact-popup" onClick={(e) => e.stopPropagation()}>
+                        <h4>Contact Information</h4>
+                        <p><strong>Name:</strong> {selectedRequestor.userFullName}</p>
+                        <p><strong>Email:</strong> {selectedRequestor.userEmail}</p>
+                        <p><strong>Requested:</strong> {formatDate(selectedRequestor.requestDate)}</p>
+                        <button className="close-popup-btn" onClick={closeContactPopup}>
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { auth, db } from '../firebaseConfig';
 import { doc, setDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
@@ -37,6 +37,9 @@ function SignUp() {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
 
+      // Send email verification
+      await sendEmailVerification(user);
+
       // Save additional user info in Firestore
       await setDoc(doc(db, "users", user.uid), {
         fullName: formData.fullName,
@@ -44,10 +47,11 @@ function SignUp() {
         createdAt: new Date()
       });
 
+      setIsLoading(false);
+      alert('Account created! Please check your email and verify your account before signing in.');
       navigate('/signin');
     } catch (err) {
       setError(err.message);
-    } finally {
       setIsLoading(false);
     }
   };

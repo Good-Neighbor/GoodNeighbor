@@ -12,12 +12,11 @@ const sortOptions = [
     { value: "category", label: "Category" }
 ];
 
-function ListingsPage({ listings = [], onContact, onFavorite, onShare, favorites = [], currentUserId }) {
+function ListingsPage({ listings = [], onContact, onFavorite, onShare, onMatch, onClaim, favorites = [], currentUserId, loading = false }) {
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [searchQuery, setSearchQuery] = useState("");
     const [sortBy, setSortBy] = useState("newest");
     const [viewMode, setViewMode] = useState("grid"); // grid or list
-    const [loading, setLoading] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
 
     // Filter and sort listings
@@ -107,6 +106,18 @@ function ListingsPage({ listings = [], onContact, onFavorite, onShare, favorites
         }
     };
 
+    const handleListingMatch = (listingId, requestor) => {
+        if (onMatch) {
+            onMatch(listingId, requestor);
+        }
+    };
+
+    const handleListingClaim = (listingId) => {
+        if (onClaim) {
+            onClaim(listingId);
+        }
+    };
+
     const navigate = useNavigate();
 
     const handleBackToStart = () => {
@@ -125,7 +136,7 @@ function ListingsPage({ listings = [], onContact, onFavorite, onShare, favorites
                     Back to Home
                 </button>
                 <div className="header-content">
-                    <h1>Free Items Marketplace</h1>
+                    <h1>Marketplace</h1>
                     <p>Find free items in your community</p>
                 </div>
             </div>
@@ -290,6 +301,8 @@ function ListingsPage({ listings = [], onContact, onFavorite, onShare, favorites
                                 onContact={handleListingContact}
                                 onFavorite={handleListingFavorite}
                                 onShare={handleListingShare}
+                                onMatch={handleListingMatch}
+                                onClaim={handleListingClaim}
                                 isFavorited={favorites.includes(listing.id)}
                                 currentUserId={currentUserId}
                                 showActions={true}

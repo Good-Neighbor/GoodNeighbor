@@ -97,6 +97,16 @@
     color: white;
 }
 
+.status-matched {
+    background-color: #f39c12;
+    color: white;
+}
+
+.status-claimed {
+    background-color: #95a5a6;
+    color: white;
+}
+
 .favorite-btn {
     position: absolute;
     top: 8px;
@@ -245,4 +255,95 @@
 
 .contact-btn.primary {
     background-color: #1877f2;
+}
+
+.request-count-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    background-color: #1877f2;
+    color: white;
+    z-index: 2;
+}
+
+.requested-indicator {
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    background-color: #e8f5e8;
+    color: #2d5a2d;
+    border: 1px solid #c3e6c3;
+}
+
+.own-listing-indicator {
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    background-color: #e3f2fd;
+    color: #1565c0;
+    border: 1px solid #bbdefb;
+}
+
+.contact-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.contact-popup {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.contact-popup h4 {
+    margin: 0 0 16px 0;
+    color: #1c1e21;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.contact-popup p {
+    margin: 0 0 8px 0;
+    color: #65676b;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.contact-popup p strong {
+    color: #1c1e21;
+    font-weight: 600;
+}
+
+.close-popup-btn {
+    margin-top: 16px;
+    padding: 8px 16px;
+    background-color: #1877f2;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.close-popup-btn:hover {
+    background-color: #166fe5;
 }

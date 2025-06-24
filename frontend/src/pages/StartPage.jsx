@@ -1,9 +1,11 @@
 import './StartPage.css';
 import { useNavigate } from 'react-router-dom';
 import React from 'react';
+import { useAuth } from '../components/AuthContext';
 
 function StartPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   return (
     <div className="start-container">
@@ -39,6 +41,14 @@ function StartPage() {
             >
               Create Listing
             </button>
+            {user && (
+              <button 
+                className="start-button secondary"
+                onClick={() => navigate("/account")}
+              >
+                Account
+              </button>
+            )}
           </div>
 
           <div className="start-footer">
