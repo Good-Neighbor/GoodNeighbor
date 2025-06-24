@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
 import { auth, db } from '../firebaseConfig';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDocs, collection, query, where } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import './SignUp.css';
 
 function SignUp() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
+    username: '',
     fullName: '',
     email: '',
     password: '',
@@ -22,6 +23,14 @@ function SignUp() {
     if (error) setError('');
   };
 
+  // Check if username is unique (case-insensitive)
+  const isUsernameUnique = async (username) => {
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('username', '==', username));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.empty;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -33,15 +42,33 @@ function SignUp() {
       return;
     }
 
+    // Username uniqueness check
+    const username = formData.username.trim();
+    if (!username) {
+      setError('Username is required');
+      setIsLoading(false);
+      return;
+    }
+    const unique = await isUsernameUnique(username.toLowerCase());
+    if (!unique) {
+      setError('Username is already taken. Please choose another.');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
+
+      // Set displayName in Firebase Auth
+      await updateProfile(user, { displayName: formData.fullName });
 
       // Send email verification
       await sendEmailVerification(user);
 
       // Save additional user info in Firestore
       await setDoc(doc(db, "users", user.uid), {
+        username: username,
         fullName: formData.fullName,
         email: formData.email,
         createdAt: new Date()
@@ -78,6 +105,20 @@ function SignUp() {
         </div>
 
         <form onSubmit={handleSubmit} className="signup-form">
+          <div className="input-group">
+            <label htmlFor="username" className="input-label">Username</label>
+            <input
+              id="username"
+              name="username"
+              type="text"
+              placeholder="Choose a unique username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+              className="signup-input"
+            />
+          </div>
+
           <div className="input-group">
             <label htmlFor="fullName" className="input-label">Full Name</label>
             <input

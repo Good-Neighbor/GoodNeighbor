@@ -29,12 +29,12 @@ export const AuthProvider = ({ children }) => {
 
     if (userSnap.exists()) {
       // Update existing user profile
+      const existingProfile = userSnap.data();
       await updateDoc(userRef, {
         email: user.email,
-        displayName: user.displayName || user.email?.split('@')[0] || 'User',
         lastLogin: new Date(),
       });
-      setUserProfile(userSnap.data());
+      setUserProfile(existingProfile);
     } else {
       // Create new user profile
       const newUserProfile = {

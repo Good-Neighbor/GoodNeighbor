@@ -306,6 +306,7 @@ function ListingsPage({ listings = [], onContact, onFavorite, onShare, onMatch, 
                                 isFavorited={favorites.includes(listing.id)}
                                 currentUserId={currentUserId}
                                 showActions={true}
+                                viewMode={viewMode}
                             />
                         ))}
                     </div>

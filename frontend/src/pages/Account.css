@@ -806,4 +806,64 @@
   flex-direction: column;
   gap: 0.5rem;
   align-items: flex-end;
+}
+
+/* Profile Update */
+.profile-update {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.profile-update h3 {
+  margin: 0 0 1.5rem 0;
+  color: #1a202c;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.profile-update .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.profile-update label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #4a5568;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.profile-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.profile-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.update-profile-btn {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #42b883 0%, #3aa876 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.update-profile-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(66, 184, 131, 0.3);
 } 

@@ -714,3 +714,38 @@ select:focus {
     gap: 1rem;
   }
 }
+
+.filter-tag {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 0.95em;
+  font-weight: 500;
+  border-radius: 16px;
+  padding: 0.35em 0.9em 0.35em 0.9em;
+  margin-right: 0.5em;
+  margin-bottom: 0.5em;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08);
+  transition: background 0.2s;
+}
+
+.filter-tag button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.1em;
+  margin-left: 0.5em;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 1.5em;
+  height: 1.5em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.filter-tag button:hover {
+  background: rgba(255,255,255,0.18);
+}

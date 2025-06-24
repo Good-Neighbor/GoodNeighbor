@@ -10,7 +10,8 @@ function Listing({
     onClaim,
     showActions = true,
     isFavorited = false,
-    currentUserId = null 
+    currentUserId = null,
+    viewMode = 'grid',
 }) {
     // const [imageLoaded, setImageLoaded] = useState(false);
     // const [imageError, setImageError] = useState(false);
@@ -130,6 +131,36 @@ function Listing({
     // Get request count
     const requestCount = (listing.requestors || []).length;
 
+    if (viewMode === 'list') {
+        // Compact line view
+        return (
+            <div className="listing-row">
+                <div className="listing-row-main">
+                    <div className="listing-row-title">{listing.title}</div>
+                    <div className="listing-row-meta">
+                        <span className="listing-row-category">{listing.category}</span>
+                        <span className="listing-row-sep">•</span>
+                        <span className="listing-row-location">{listing.location}</span>
+                        <span className="listing-row-sep">•</span>
+                        {(listing.status === 'available' || listing.status === 'claimed') && (
+                            <span className={`status-badge ${getStatusClass(listing.status)}`}>{listing.status}</span>
+                        )}
+                        {listing.status === 'matched' && (
+                            <span className="matched-badge">✓ Matched</span>
+                        )}
+                        <span className="listing-row-sep">•</span>
+                        <span className="listing-row-date">{formatDate(listing.datePosted)}</span>
+                    </div>
+                </div>
+                {showActions && (
+                    <div className="listing-row-actions">
+                        {/* You can add compact action buttons here if desired */}
+                    </div>
+                )}
+            </div>
+        );
+    }
+
     return (
         <div className="listing-card">
             {/* Image Section */}
@@ -161,9 +192,11 @@ function Listing({
                 {/* )} */}
 
                 {/* Status Badge */}
-                <div className={`status-badge ${getStatusClass(listing.status)}`}>
-                    {listing.status || 'Available'}
-                </div>
+                {(listing.status === 'available' || listing.status === 'claimed') && (
+                    <div className={`status-badge ${getStatusClass(listing.status)}`}>
+                        {listing.status || 'Available'}
+                    </div>
+                )}
 
                 {/* Request Count Badge (for own listings) */}
                 {isOwnListing && requestCount > 0 && (

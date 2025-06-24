@@ -6,7 +6,7 @@ import { db } from '../firebaseConfig';
 import './Account.css';
 
 function Account() {
-    const { currentUser, userProfile, logout } = useAuth();
+    const { currentUser, userProfile, logout, updateUserProfile } = useAuth();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('profile');
     const [myListings, setMyListings] = useState([]);
@@ -291,6 +291,41 @@ function Account() {
                                     <span>{userProfile?.createdAt ? formatDate(userProfile.createdAt) : 'Unknown'}</span>
                                 </div>
                             </div>
+                            
+                            {/* Profile Update Form */}
+                            <div className="profile-update">
+                                <h3>Update Profile</h3>
+                                <form onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    const formData = new FormData(e.target);
+                                    const fullName = formData.get('fullName');
+                                    
+                                    if (fullName.trim()) {
+                                        const success = await updateUserProfile({ fullName: fullName.trim() });
+                                        if (success) {
+                                            alert('Profile updated successfully!');
+                                        } else {
+                                            alert('Failed to update profile. Please try again.');
+                                        }
+                                    }
+                                }}>
+                                    <div className="form-group">
+                                        <label htmlFor="fullName">Full Name</label>
+                                        <input
+                                            type="text"
+                                            id="fullName"
+                                            name="fullName"
+                                            placeholder="Enter your full name"
+                                            defaultValue={userProfile?.fullName || ''}
+                                            className="profile-input"
+                                        />
+                                    </div>
+                                    <button type="submit" className="update-profile-btn">
+                                        Update Profile
+                                    </button>
+                                </form>
+                            </div>
+                            
                             <button onClick={handleLogout} className="logout-btn">
                                 Sign Out
                             </button>
@@ -369,9 +404,11 @@ function Account() {
                                             <div className="request-header">
                                                 <h3>{request.title}</h3>
                                                 <div className="request-status">
-                                                    <span className={`status-badge ${getStatusClass(request.status)}`}>
-                                                        {request.status}
-                                                    </span>
+                                                    {(request.status === 'available' || request.status === 'claimed') && (
+                                                        <span className={`status-badge ${getStatusClass(request.status)}`}>
+                                                            {request.status}
+                                                        </span>
+                                                    )}
                                                     {request.isMatched && (
                                                         <span className="matched-badge">✓ Matched</span>
                                                     )}
