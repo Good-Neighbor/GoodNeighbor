@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
-import { auth, db } from '../firebaseConfig';
+import { auth, db, incrementStat } from '../firebaseConfig';
 import { doc, setDoc, getDocs, collection, query, where } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import './SignUp.css';
@@ -73,6 +73,9 @@ function SignUp() {
         email: formData.email,
         createdAt: new Date()
       });
+
+      // Increment account stat
+      await incrementStat('accounts');
 
       setIsLoading(false);
       alert('Account created! Please check your email and verify your account before signing in.');

@@ -1,0 +1,252 @@
+/* About Page Styles */
+
+.about-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem 1rem;
+  position: relative;
+}
+
+.about-container {
+  max-width: 700px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.08);
+  overflow: hidden;
+  position: relative;
+}
+
+.back-to-start-btn {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: #667eea;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  outline: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.back-to-start-btn:hover {
+  background: white;
+  border-color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+  color: #667eea;
+}
+
+.back-to-start-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1), 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #667eea;
+}
+
+.back-to-start-btn svg {
+  color: inherit;
+}
+
+.about-title {
+  text-align: center;
+  color: #667eea;
+  margin-bottom: 2rem;
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.community-stats-card {
+  margin: 0 auto 2rem auto;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(102,126,234,0.10);
+  padding: 2.5rem 2rem;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.community-stats-title {
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: #667eea;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
+}
+
+.community-stats-loading {
+  color: #718096;
+  font-size: 1.1rem;
+}
+
+.community-stats-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.community-stat {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  justify-content: center;
+}
+
+.community-stat-number {
+  font-size: 2.2rem;
+  font-weight: 700;
+  min-width: 60px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+.community-stat-number.accounts {
+  color: #667eea;
+}
+.community-stat-number.listings {
+  color: #764ba2;
+}
+
+.community-stat-label {
+  font-size: 1.1rem;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.about-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.about-section-title {
+  color: #1a202c;
+  margin-bottom: 2rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.about-section-text {
+  font-size: 1.1rem;
+  color: #4a5568;
+  line-height: 1.7;
+}
+
+.co-founders-list {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+.co-founder-link {
+  text-decoration: none;
+  color: inherit;
+  flex: 1;
+  max-width: 200px;
+}
+
+.co-founder {
+  text-align: center;
+  padding: 1.5rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.co-founder:hover {
+  background: #f1f5f9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.co-founder-name {
+  color: #1a202c;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.co-founder-nickname {
+  color: #667eea;
+  font-size: 1rem;
+  margin: 0;
+  font-style: italic;
+}
+
+@media (max-width: 600px) {
+  .about-container {
+    padding: 1rem;
+    border-radius: 14px;
+  }
+  .community-stats-card {
+    padding: 1.5rem 0.5rem;
+    border-radius: 12px;
+  }
+  .about-section {
+    padding: 1rem;
+    border-radius: 10px;
+  }
+  .about-title {
+    font-size: 1.5rem;
+  }
+  .back-to-start-btn {
+    top: 1rem;
+    left: 1rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+  .back-to-start-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+  .co-founders-list {
+    flex-direction: column;
+    align-items: center;
+  }
+  .co-founder-link {
+    max-width: 100%;
+    width: 100%;
+  }
+  .co-founder {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .back-to-start-btn {
+    position: relative;
+    top: 0;
+    left: 0;
+    margin-bottom: 1rem;
+    align-self: flex-start;
+  }
+  .about-container {
+    position: relative;
+    padding-top: 1rem;
+  }
+} 

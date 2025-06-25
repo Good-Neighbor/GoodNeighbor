@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, doc, runTransaction, getDoc, collection, getDocs } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -23,3 +23,51 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+
+// Stats utility functions
+const statsDocRef = doc(db, 'meta', 'stats');
+
+export async function incrementStat(statName) {
+  // statName: 'accounts' or 'listings'
+  await runTransaction(db, async (transaction) => {
+    const statsDoc = await transaction.get(statsDocRef);
+    if (!statsDoc.exists()) {
+      transaction.set(statsDocRef, { [statName]: 1 });
+    } else {
+      const data = statsDoc.data();
+      const current = typeof data[statName] === 'number' ? data[statName] : 0;
+      transaction.update(statsDocRef, { [statName]: current + 1 });
+    }
+  });
+}
+
+export async function getStats() {
+  const statsSnap = await getDoc(statsDocRef);
+  return statsSnap.exists() ? statsSnap.data() : { accounts: 0, listings: 0 };
+}
+
+export async function updateStatsFromExistingData() {
+  try {
+    // Count users
+    const usersSnapshot = await getDocs(collection(db, 'users'));
+    const userCount = usersSnapshot.size;
+    
+    // Count listings
+    const listingsSnapshot = await getDocs(collection(db, 'listings'));
+    const listingCount = listingsSnapshot.size;
+    
+    // Update stats document
+    await runTransaction(db, async (transaction) => {
+      transaction.set(statsDocRef, { 
+        accounts: userCount, 
+        listings: listingCount 
+      });
+    });
+    
+    console.log(`Updated stats: ${userCount} accounts, ${listingCount} listings`);
+    return { accounts: userCount, listings: listingCount };
+  } catch (error) {
+    console.error('Error updating stats:', error);
+    throw error;
+  }
+}

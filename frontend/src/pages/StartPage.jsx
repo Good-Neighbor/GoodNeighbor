@@ -49,6 +49,12 @@ function StartPage() {
                 Account
               </button>
             )}
+            <button 
+              className="start-button secondary"
+              onClick={() => navigate("/about")}
+            >
+              About
+            </button>
           </div>
 
           <div className="start-footer">

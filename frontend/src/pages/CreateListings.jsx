@@ -81,7 +81,7 @@ function CreateListing({ onCreate }){
             setErrors({});
             
             alert("Listing created successfully!");
-            navigate('/listingspage');
+            navigate('/');
             
         } catch (error) {
             console.error("Error creating listing:", error);
