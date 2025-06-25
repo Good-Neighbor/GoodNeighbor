@@ -4,7 +4,7 @@ import { collection, addDoc, getDocs, onSnapshot, updateDoc, doc } from 'firebas
 import { db } from './firebaseConfig';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import StartPage from './pages/StartPage';
-import SignIn from './pages/Signin';
+import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import ListingsPage from './pages/ListingsPage';  
 import CreateListings from './pages/CreateListings';
