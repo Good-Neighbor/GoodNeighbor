@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { getAllListings, searchListings } from '../listingStorage.js';
 import { useNavigate } from 'react-router-dom';
 import './ServicesPage.css';
 
