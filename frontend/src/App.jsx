@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { collection, addDoc, getDocs, onSnapshot, updateDoc, doc } from 'firebase/firestore';
-import { db, incrementStat } from './firebaseConfig';
+import { db, incrementStat, storage } from './firebaseConfig';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import StartPage from './pages/StartPage';
-import SignIn from './pages/Signin';
+import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import ListingsPage from './pages/ListingsPage';  
 import CreateListings from './pages/CreateListings';
 import Account from './pages/Account';
 import About from './pages/About';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+
+{/*import ServicesPage from './pages/ServicesPage';
+import CreateService from './pages/CreateService';*/}
+
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -24,18 +29,19 @@ const ProtectedRoute = ({ children }) => {
 
 function AppContent() {
   const [listings, setListings] = useState([]);
+  const [services, setServices] = useState([]);
+  const [servicesLoading, setServicesLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const { currentUser, userProfile, getUserProfile } = useAuth();
 
   // Fetch listings from Firestore
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'listings'), (snapshot) => {
+    const unsubscribeListings = onSnapshot(collection(db, 'listings'), (snapshot) => {
       const listingsData = snapshot.docs.map(doc => {
         const data = doc.data();
-        // Remove the custom id field if it exists, keep the Firestore document ID
         const { id: customId, ...listingData } = data;
         return {
-          id: doc.id, // This is the Firestore document ID
+          id: doc.id,
           ...listingData
         };
       });
@@ -46,13 +52,121 @@ function AppContent() {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    const unsubscribeServices = onSnapshot(collection(db, 'services'), (snapshot) => {
+      const servicesData = snapshot.docs.map(doc => {
+        const data = doc.data();
+        const { id: customId, ...serviceData } = data;
+        return {
+          id: doc.id,
+          ...serviceData
+        };
+      });
+      setServices(servicesData);
+      setServicesLoading(false);
+    }, (error) => {
+      console.error('Error fetching services:', error);
+      setServicesLoading(false);
+    });
+
+    return () => {
+      unsubscribeListings();
+      unsubscribeServices();
+    };
   }, []);
 
-  // Create new listing
-  const handleCreateListing = async (newListing) => {
+  const compressImage = (file, maxWidth = 1200, maxHeight = 1200, quality = 0.8) => {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        let { width, height } = img;
+        
+        if (width > height) {
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = (width * maxHeight) / height;
+            height = maxHeight;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(new Error('Canvas to Blob conversion failed'));
+            }
+          },
+          'image/jpeg',
+          quality
+        );
+      };
+      
+      img.onerror = () => reject(new Error('Image loading failed'));
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  const uploadPhotos = async (listingId, files, onProgress = null) => {
+    if (!files || files.length === 0) return [];
+    
     try {
-      const docRef = await addDoc(collection(db, 'listings'), {
+      const uploadPromises = Array.from(files).map(async (file, index) => {
+        if (!file.type.startsWith('image/')) {
+          throw new Error(`File ${file.name} is not an image`);
+        }
+        
+        const timestamp = Date.now();
+        const fileName = `${timestamp}_${index}.jpg`;
+        
+        // Compress image
+        const compressedImage = await compressImage(file, 1200, 1200, 0.8);
+        const compressedFile = new File([compressedImage], fileName, {
+          type: 'image/jpeg'
+        });
+        
+        // Upload to Firebase Storage
+        const storageRef = ref(storage, `listings/${listingId}/photos/${fileName}`);
+        const snapshot = await uploadBytes(storageRef, compressedFile);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        
+        if (onProgress) {
+          onProgress(index + 1, files.length);
+        }
+        
+        return {
+          url: downloadURL,
+          fileName: fileName,
+          path: snapshot.ref.fullPath,
+          originalFileName: file.name,
+          originalSize: file.size,
+          compressedSize: compressedImage.size,
+          uploadedAt: new Date()
+        };
+      });
+      
+      return await Promise.all(uploadPromises);
+    } catch (error) {
+      console.error('Error uploading photos:', error);
+      throw error;
+    }
+  };
+
+  // Create new listing
+  const handleCreateListing = async (newListing, photoFiles = []) => {
+    try {
+      // First, create the listing document without photos
+      const listingWithMetadata = {
         ...newListing,
         userId: currentUser.uid,
         userEmail: userProfile?.email || currentUser.email,
@@ -60,13 +174,94 @@ function AppContent() {
         createdAt: new Date(),
         requestors: [],
         matchedWith: null,
-        status: 'available'
-      });
-      // Increment listing stat
-      await incrementStat('listings');
-      console.log('Listing created with ID:', docRef.id);
+        status: 'available',
+        photos: [],
+        views: 0,
+        favorites: []
+      };
+
+      const docRef = await addDoc(collection(db, 'listings'), listingWithMetadata);
+      const listingId = docRef.id;
+      
+      // Upload photos if provided
+      if (photoFiles && photoFiles.length > 0) {
+        const uploadedPhotos = await uploadPhotos(listingId, photoFiles);
+        
+        // Update the listing document with photo URLs
+        await updateDoc(docRef, {
+          photos: uploadedPhotos,
+          updatedAt: new Date()
+        });
+      }
+
+      console.log('Listing created with ID:', listingId);
+      return listingId;
     } catch (error) {
       console.error('Error creating listing:', error);
+      throw error;
+    }
+  };  
+
+  const handleCreateService = async (newService, photoFiles = []) => {
+    try {
+      const serviceWithMetadata = {
+        ...newService,
+        userId: currentUser.uid,
+        userEmail: userProfile?.email || currentUser.email,
+        userFullName: userProfile?.fullName || currentUser.displayName || 'User',
+        createdAt: new Date(),
+        requestors: [],
+        matchedWith: null,
+        status: 'available',
+        reviews: [],
+        rating: 0,
+        photos: [],
+        views: 0
+      };
+
+      const docRef = await addDoc(collection(db, 'services'), serviceWithMetadata);
+      const serviceId = docRef.id;
+      
+      // Upload photos if provided
+      if (photoFiles && photoFiles.length > 0) {
+        const uploadedPhotos = await uploadPhotos(serviceId, photoFiles);
+        
+        // Update the service document with photo URLs
+        await updateDoc(docRef, {
+          photos: uploadedPhotos,
+          updatedAt: new Date()
+        });
+      }
+
+      console.log('Service created with ID:', serviceId);
+      return serviceId;
+    } catch (error) {
+      console.error('Error creating service:', error);
+      throw error;
+    }
+  };  
+
+  const deletePhoto = async (photoData, collectionName, documentId) => {
+    try {
+      // Delete from Storage
+      const photoRef = ref(storage, photoData.path);
+      await deleteObject(photoRef);
+      
+      // Remove from Firestore document
+      const docRef = doc(db, collectionName, documentId);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const currentPhotos = docSnap.data().photos || [];
+        const updatedPhotos = currentPhotos.filter(photo => photo.path !== photoData.path);
+        
+        await updateDoc(docRef, {
+          photos: updatedPhotos,
+          updatedAt: new Date()
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting photo:', error);
       throw error;
     }
   };
@@ -126,6 +321,61 @@ function AppContent() {
     }
   };
 
+  const handleServiceContact = async (service) => {
+    if (!currentUser) {
+      alert('Please sign in to contact the service provider');
+      return;
+    }
+
+    if (!service) {
+      console.error('Invalid service object:', service);
+      alert('Invalid service. Please try again.');
+      return;
+    }
+
+    try {
+      console.log('Service object:', service);
+      console.log('Current user:', currentUser.uid);
+      
+      // Check if user already requested this service
+      const requestors = Array.isArray(service.requestors) ? service.requestors : [];
+      console.log('Requestors array:', requestors);
+      
+      const alreadyRequested = requestors.some(req => req.userId === currentUser.uid);
+      if (alreadyRequested) {
+        alert('You have already requested this service');
+        return;
+      }
+
+      // Use the Firestore document ID
+      const serviceRef = doc(db, 'services', service.id);
+      const newRequestor = {
+        userId: currentUser.uid,
+        userEmail: userProfile?.email || currentUser.email,
+        userFullName: userProfile?.fullName || currentUser.displayName || 'User',
+        requestDate: new Date().toISOString()
+      };
+
+      console.log('New requestor:', newRequestor);
+      console.log('Updated requestors array:', [...requestors, newRequestor]);
+
+      await updateDoc(serviceRef, {
+        requestors: [...requestors, newRequestor]
+      });
+
+      alert('Service request sent successfully!');
+    } catch (error) {
+      console.error('Error sending service request:', error);
+      console.error('Error details:', {
+        service: service,
+        currentUser: currentUser?.uid,
+        userProfile: userProfile
+      });
+      alert('Failed to send service request. Please try again.');
+    }
+  };
+
+
   // Handle listing favorite
   const handleFavorite = (listingId) => {
     // You can implement favorite functionality here
@@ -167,6 +417,160 @@ function AppContent() {
     }
   };
 
+  // Handle service favorite
+  const handleServiceFavorite = (serviceId) => {
+    console.log('Favoriting service:', serviceId);
+  };
+
+  // Handle service share
+  const handleServiceShare = (service) => {
+    console.log('Sharing service:', service.title);
+  };
+
+  // Handle service matching with requestor
+  const handleServiceMatch = async (serviceId, requestor) => {
+    try {
+      const serviceRef = doc(db, 'services', serviceId);
+      await updateDoc(serviceRef, {
+        matchedWith: requestor,
+        status: 'matched'
+      });
+      alert('Successfully matched with service requestor!');
+    } catch (error) {
+      console.error('Error matching with service requestor:', error);
+      alert('Failed to match with service requestor. Please try again.');
+    }
+  };
+
+  // Handle marking service as completed
+  const handleServiceComplete = async (serviceId) => {
+    try {
+      const serviceRef = doc(db, 'services', serviceId);
+      await updateDoc(serviceRef, {
+        status: 'completed'
+      });
+      alert('Service marked as completed!');
+    } catch (error) {
+      console.error('Error completing service:', error);
+      alert('Failed to mark service as completed. Please try again.');
+    }
+  };
+
+  /*Update an existing listing*/
+  const updateListing = async (listingId, updateData, newPhotoFiles = [], onProgress = null) => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('User must be authenticated');
+      }
+  
+      // Verify user owns the listing
+      const listingDoc = await getDoc(doc(db, 'listings', listingId));
+      if (!listingDoc.exists()) {
+        throw new Error('Listing not found');
+      }
+      
+      if (listingDoc.data().userId !== user.uid) {
+        throw new Error('You can only update your own listings');
+      }
+  
+      // Prepare update data
+      const updateDataWithTimestamp = {
+        ...updateData,
+        updatedAt: new Date(),
+        // Convert price to number if it exists
+        price: updateData.price ? parseFloat(updateData.price) : updateData.price
+      };
+  
+      // Upload new photos if provided
+      if (newPhotoFiles && newPhotoFiles.length > 0) {
+        const uploadedPhotos = await uploadListingPhotos(listingId, newPhotoFiles, onProgress);
+        
+        // Add new photos to existing ones
+        updateDataWithTimestamp.photos = arrayUnion(...uploadedPhotos);
+      }
+  
+      await updateDoc(doc(db, 'listings', listingId), updateDataWithTimestamp);
+      console.log('Listing updated successfully');
+      
+    } catch (error) {
+      console.error('Error updating listing:', error);
+      throw error;
+    }
+  };
+
+  /*Delete a listing and all its photos*/
+  const deleteListing = async (listingId) => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('User must be authenticated');
+      }
+  
+      // Get listing data first
+      const listingDoc = await getDoc(doc(db, 'listings', listingId));
+      if (!listingDoc.exists()) {
+        throw new Error('Listing not found');
+      }
+      
+      const listingData = listingDoc.data();
+      
+      if (listingData.userId !== user.uid) {
+        throw new Error('You can only delete your own listings');
+      }
+  
+      // Delete all photos from storage
+      if (listingData.photos && listingData.photos.length > 0) {
+        const deletePromises = listingData.photos.map(photo => {
+          const photoRef = ref(storage, photo.path);
+          return deleteObject(photoRef);
+        });
+        
+        await Promise.all(deletePromises);
+      }
+  
+      // Delete the listing document
+      await deleteDoc(doc(db, 'listings', listingId));
+      console.log('Listing and all photos deleted successfully');
+      
+    } catch (error) {
+      console.error('Error deleting listing:', error);
+      throw error;
+    }
+  };
+
+  /*Get all listings for the current user*/
+  const getUserListings = async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('User must be authenticated');
+      }
+  
+      const q = query(
+        collection(db, 'listings'),
+        where('userId', '==', user.uid),
+        orderBy('createdAt', 'desc')
+      );
+      
+      const querySnapshot = await getDocs(q);
+      const listings = [];
+      
+      querySnapshot.forEach((doc) => {
+        listings.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+      
+      return listings;
+      
+    } catch (error) {
+      console.error('Error fetching user listings:', error);
+      throw error;
+    }
+  };
+
   return (
     <Router basename="/GoodNeighbor">
       <Routes>
@@ -196,6 +600,29 @@ function AppContent() {
             </ProtectedRoute>
           } 
         />
+        {/*<Route 
+          path="/servicespage" 
+          element={
+          <ServicesPage 
+            services={services}
+            loading={servicesLoading}
+            onContact={handleServiceContact}
+            onFavorite={handleServiceFavorite}
+            onShare={handleServiceShare}
+            onMatch={handleServiceMatch}
+            onComplete={handleServiceComplete}
+            currentUserId={currentUser?.uid}
+          />
+          } 
+        />
+        <Route 
+          path="/createservice" 
+          element={
+            <ProtectedRoute>
+              <CreateService onCreate={handleCreateService} />
+            </ProtectedRoute>
+          } 
+        />*/}
         <Route 
           path="/account" 
           element={

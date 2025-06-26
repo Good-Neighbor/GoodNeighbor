@@ -13,8 +13,8 @@ function Listing({
     currentUserId = null,
     viewMode = 'grid',
 }) {
-    // const [imageLoaded, setImageLoaded] = useState(false);
-    // const [imageError, setImageError] = useState(false);
+    const [imageLoaded, setImageLoaded] = useState(false);
+    const [imageError, setImageError] = useState(false);
     const [showContactPopup, setShowContactPopup] = useState(false);
     const [selectedRequestor, setSelectedRequestor] = useState(null);
 
@@ -68,13 +68,13 @@ function Listing({
         }
     };
 
-    // const handleImageError = () => {
-    //     setImageError(true);
-    // };
+    const handleImageError = () => {
+        setImageError(true);
+    };
 
-    // const handleImageLoad = () => {
-    //     setImageLoaded(true);
-    // };
+    const handleImageLoad = () => {
+         setImageLoaded(true);
+    };
 
     const handleContact = (e) => {
         e.stopPropagation();
@@ -165,7 +165,7 @@ function Listing({
         <div className="listing-card">
             {/* Image Section */}
             <div className="listing-image-container">
-                {/* {!imageError && listing.image ? (
+                {!imageError && listing.image ? (
                     <>
                         <img
                             src={listing.image}
@@ -180,7 +180,7 @@ function Listing({
                             </div>
                         )}
                     </>
-                ) : ( */}
+                ) : (
                     <div className="image-placeholder no-image">
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
@@ -189,7 +189,7 @@ function Listing({
                         </svg>
                         <span>No Image</span>
                     </div>
-                {/* )} */}
+                )}
 
                 {/* Status Badge */}
                 {(listing.status === 'available' || listing.status === 'claimed') && (

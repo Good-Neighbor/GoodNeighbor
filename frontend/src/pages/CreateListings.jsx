@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { createListingWithPhotos } from "../listingStorage";
 import "./CreateListings.css";
 
 const categories = ["Books & Media", "Electronics", "Toys & Games", "Sports & Outdoors", "Home & Garden", "Office & School Supplies", "Vehicles & Parts", "Baby & Kids"];
@@ -15,7 +16,9 @@ function CreateListing({ onCreate }){
         description: ""
     });
 
+    const [photos, setPhotos] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
     const [errors, setErrors] = useState({}); 
 
     const handleInputChange = (e) => {
@@ -27,14 +30,25 @@ function CreateListing({ onCreate }){
         }
     };
 
+    const handlePhotoSelect = (e) => {
+        const files = Array.from(e.target.files);
+        setPhotos(files);
+        
+        // Clear photo error if photos are selected
+        if (files.length > 0 && errors.photos) {
+            setErrors(prev => ({ ...prev, photos: "" }));
+        }
+    };
+
     const validateForm = () => {
         let isValid = true;
         const newErrors = {};
-        if (!form.title) {
+        
+        if (!form.title.trim()) {
             newErrors.title = "Title is required.";
             isValid = false;
         }
-        if (!form.location) {
+        if (!form.location.trim()) {
             newErrors.location = "Location is required.";
             isValid = false;
         }
@@ -46,10 +60,11 @@ function CreateListing({ onCreate }){
             newErrors.condition = "Condition is required.";
             isValid = false;
         }
-        if (!form.description) {
+        if (!form.description.trim()) {
             newErrors.description = "Description is required."; 
             isValid = false;
         }
+        
         setErrors(newErrors);
         return isValid;
     };
@@ -59,18 +74,31 @@ function CreateListing({ onCreate }){
         if (!validateForm()) { 
             return;
         }
+        
         setIsSubmitting(true);
+        setUploadProgress({ current: 0, total: photos.length });
+        
         try{
-            const newListing = {
-                ...form,
-                datePosted: new Date().toISOString(),
-                status: "available"
-            };       
-            
+            // Create listing with photos using Firebase
+            const listingId = await createListingWithPhotos(
+                form,
+                photos,
+                (current, total) => setUploadProgress({ current, total })
+            );
+
+            // Call the onCreate prop if provided (for backward compatibility)
             if (onCreate) {
+                const newListing = {
+                    id: listingId,
+                    ...form,
+                    datePosted: new Date().toISOString(),
+                    status: "available",
+                    photos: photos.length > 0 ? photos.map(file => file.name) : []
+                };
                 await onCreate(newListing);
             }
 
+            // Reset form
             setForm({
                 title: "",
                 description: "",
@@ -78,7 +106,9 @@ function CreateListing({ onCreate }){
                 category: categories[0],
                 condition: "Good"
             });
+            setPhotos([]);
             setErrors({});
+            setUploadProgress({ current: 0, total: 0 });
             
             alert("Listing created successfully!");
             navigate('/');
@@ -195,6 +225,58 @@ function CreateListing({ onCreate }){
                         {errors.location && <span className="error-message">{errors.location}</span>}
                     </div>
 
+                    {/* Photos */}
+                    <div className="form-group">
+                        <label htmlFor="photos">Photos</label>
+                        <input
+                            type="file"
+                            id="photos"
+                            multiple
+                            accept="image/*"
+                            onChange={handlePhotoSelect}
+                            className="photo-input"
+                        />
+                        <div className="photo-help-text">
+                            <small>You can select multiple photos (optional)</small>
+                        </div>
+                        
+                        {/* Photo Preview */}
+                        {photos.length > 0 && (
+                            <div className="photo-preview">
+                                <p>{photos.length} photo{photos.length > 1 ? 's' : ''} selected:</p>
+                                <div className="photo-list">
+                                    {photos.map((file, index) => (
+                                        <div key={index} className="photo-item">
+                                            <span className="photo-name">{file.name}</span>
+                                            <span className="photo-size">
+                                                ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* Upload Progress */}
+                        {isSubmitting && photos.length > 0 && (
+                            <div className="upload-progress">
+                                <div className="progress-bar">
+                                    <div 
+                                        className="progress-fill" 
+                                        style={{ 
+                                            width: `${(uploadProgress.current / uploadProgress.total) * 100}%` 
+                                        }}
+                                    ></div>
+                                </div>
+                                <span className="progress-text">
+                                    Uploading photos: {uploadProgress.current} of {uploadProgress.total}
+                                </span>
+                            </div>
+                        )}
+                        
+                        {errors.photos && <span className="error-message">{errors.photos}</span>}
+                    </div>
+
                     {/* Submit Button */}
                     <div className="form-actions">
                         <button
@@ -211,3 +293,4 @@ function CreateListing({ onCreate }){
     );
 }
 export default CreateListing;
+

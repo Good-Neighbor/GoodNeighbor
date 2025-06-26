@@ -79,7 +79,7 @@ function SignUp() {
 
       setIsLoading(false);
       alert('Account created! Please check your email and verify your account before signing in.');
-      navigate('/signin');
+      navigate('/account');
     } catch (err) {
       setError(err.message);
       setIsLoading(false);
