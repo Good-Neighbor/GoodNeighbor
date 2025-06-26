@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 function StartPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { currentUser } = useAuth();
 
   return (
     <div className="start-container">
@@ -56,7 +56,7 @@ function StartPage() {
               Create Service
             </button>*/}
 
-            {user && (
+            {currentUser && (
               <button 
                 className="start-button secondary"
                 onClick={() => navigate("/account")}

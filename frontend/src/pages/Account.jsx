@@ -92,55 +92,55 @@ function Account() {
     }, [currentUser]);
 
     const handleDeleteListing = (listing) => {
-  setListingToDelete(listing);
-  setShowDeleteModal(true);
-};
+        setListingToDelete(listing);
+        setShowDeleteModal(true);
+    };
 
-const confirmDeleteListing = async () => {
-  if (!listingToDelete) return;
-  
-  setIsDeleting(true);
-  try {
-    // Get listing data first
-    const listingDoc = await getDoc(doc(db, 'listings', listingToDelete.id));
-    if (!listingDoc.exists()) {
-      throw new Error('Listing not found');
-    }
-    
-    const listingData = listingDoc.data();
-    
-    if (listingData.userId !== currentUser.uid) {
-      throw new Error('You can only delete your own listings');
-    }
+    const confirmDeleteListing = async () => {
+        if (!listingToDelete) return;
+        
+        setIsDeleting(true);
+        try {
+            // Get listing data first
+            const listingDoc = await getDoc(doc(db, 'listings', listingToDelete.id));
+            if (!listingDoc.exists()) {
+                throw new Error('Listing not found');
+            }
+            
+            const listingData = listingDoc.data();
+            
+            if (listingData.userId !== currentUser.uid) {
+                throw new Error('You can only delete your own listings');
+            }
 
-    // Delete all photos from storage
-    if (listingData.photos && listingData.photos.length > 0) {
-      const deletePromises = listingData.photos.map(photo => {
-        const photoRef = ref(storage, photo.path);
-        return deleteObject(photoRef);
-      });
-      
-      await Promise.allSettled(deletePromises);
-    }
+            // Delete all photos from storage
+            if (listingData.photos && listingData.photos.length > 0) {
+                const deletePromises = listingData.photos.map(photo => {
+                    const photoRef = ref(storage, photo.path);
+                    return deleteObject(photoRef);
+                });
+                
+                await Promise.allSettled(deletePromises);
+            }
 
-    // Delete the listing document
-    await deleteDoc(doc(db, 'listings', listingToDelete.id));
-    
-    alert('Listing deleted successfully!');
-    setShowDeleteModal(false);
-    setListingToDelete(null);
-  } catch (error) {
-    console.error('Error deleting listing:', error);
-    alert('Failed to delete listing. Please try again.');
-  } finally {
-    setIsDeleting(false);
-  }
-};
+            // Delete the listing document
+            await deleteDoc(doc(db, 'listings', listingToDelete.id));
+            
+            alert('Listing deleted successfully!');
+            setShowDeleteModal(false);
+            setListingToDelete(null);
+        } catch (error) {
+            console.error('Error deleting listing:', error);
+            alert('Failed to delete listing. Please try again.');
+        } finally {
+            setIsDeleting(false);
+        }
+    };
 
-const cancelDeleteListing = () => {
-    setShowDeleteModal(false);
-    setListingToDelete(null);
-};
+    const cancelDeleteListing = () => {
+        setShowDeleteModal(false);
+        setListingToDelete(null);
+    };
 
     const handleLogout = async () => {
         try {
@@ -681,47 +681,25 @@ const cancelDeleteListing = () => {
                 </div>
             )}
 
-            {/* Delete Confirmation Modal */}
+            {/* Delete Listing Modal */}
             {showDeleteModal && listingToDelete && (
-            <div className="modal-overlay" onClick={cancelDeleteListing}>
-                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-header">
-                    <h3>Delete Listing</h3>
-                    <button className="close-modal-btn" onClick={cancelDeleteListing}>×</button>
-                </div>
-                <div className="modal-body">
-                    <div className="delete-confirmation">
-                    <p>Are you sure you want to delete this listing?</p>
-                    <h4>"{listingToDelete.title}"</h4>
-                    <p className="warning-text">This action cannot be undone. All photos and data will be permanently deleted.</p>
-                    
-                    <div className="delete-actions">
-                        <button 
-                        className="cancel-btn"
-                        onClick={cancelDeleteListing}
-                        disabled={isDeleting}
-                        >
-                        Cancel
-                        </button>
-                        <button 
-                        className={`delete-confirm-btn ${isDeleting ? 'loading' : ''}`}
-                        onClick={confirmDeleteListing}
-                        disabled={isDeleting}
-                        >
-                        {isDeleting ? (
-                            <>
-                            <div className="spinner"></div>
-                            Deleting...
-                            </>
-                        ) : (
-                            'Delete Listing'
-                        )}
-                        </button>
-                    </div>
+                <div className="modal-overlay" onClick={cancelDeleteListing}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>Delete Listing</h3>
+                            <button className="close-modal-btn" onClick={cancelDeleteListing}>×</button>
+                        </div>
+                        <div className="modal-body">
+                            <p>Are you sure you want to delete <strong>{listingToDelete.title}</strong>? This action cannot be undone.</p>
+                        </div>
+                        <div className="modal-footer" style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                            <button className="cancel-btn" onClick={cancelDeleteListing} disabled={isDeleting}>Cancel</button>
+                            <button className="confirm-delete-btn" onClick={confirmDeleteListing} disabled={isDeleting} style={{ background: '#dc2626', color: 'white' }}>
+                                {isDeleting ? 'Deleting...' : 'Delete'}
+                            </button>
+                        </div>
                     </div>
                 </div>
-                </div>
-            </div>
             )}
         </div>
     );
