@@ -9,6 +9,8 @@ import SignUp from './pages/SignUp';
 import ListingsPage from './pages/ListingsPage';  
 import CreateListings from './pages/CreateListings';
 import Account from './pages/Account';
+{/*import ServicesPage from './pages/ServicesPage';
+import CreateService from './pages/CreateService';*/}
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -23,18 +25,19 @@ const ProtectedRoute = ({ children }) => {
 
 function AppContent() {
   const [listings, setListings] = useState([]);
+  const [services, setServices] = useState([]);
+  const [servicesLoading, setServicesLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const { currentUser, userProfile, getUserProfile } = useAuth();
 
   // Fetch listings from Firestore
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'listings'), (snapshot) => {
+    const unsubscribeListings = onSnapshot(collection(db, 'listings'), (snapshot) => {
       const listingsData = snapshot.docs.map(doc => {
         const data = doc.data();
-        // Remove the custom id field if it exists, keep the Firestore document ID
         const { id: customId, ...listingData } = data;
         return {
-          id: doc.id, // This is the Firestore document ID
+          id: doc.id,
           ...listingData
         };
       });
@@ -45,8 +48,28 @@ function AppContent() {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    const unsubscribeServices = onSnapshot(collection(db, 'services'), (snapshot) => {
+      const servicesData = snapshot.docs.map(doc => {
+        const data = doc.data();
+        const { id: customId, ...serviceData } = data;
+        return {
+          id: doc.id,
+          ...serviceData
+        };
+      });
+      setServices(servicesData);
+      setServicesLoading(false);
+    }, (error) => {
+      console.error('Error fetching services:', error);
+      setServicesLoading(false);
+    });
+
+    return () => {
+      unsubscribeListings();
+      unsubscribeServices();
+    };
   }, []);
+
 
   // Create new listing
   const handleCreateListing = async (newListing) => {
@@ -64,6 +87,27 @@ function AppContent() {
       console.log('Listing created with ID:', docRef.id);
     } catch (error) {
       console.error('Error creating listing:', error);
+      throw error;
+    }
+  };
+
+  const handleCreateService = async (newService) => {
+    try {
+      const docRef = await addDoc(collection(db, 'services'), {
+        ...newService,
+        userId: currentUser.uid,
+        userEmail: userProfile?.email || currentUser.email,
+        userFullName: userProfile?.fullName || currentUser.displayName || 'User',
+        createdAt: new Date(),
+        requestors: [],
+        matchedWith: null,
+        status: 'available',
+        reviews: [],
+        rating: 0
+      });
+      console.log('Service created with ID:', docRef.id);
+    } catch (error) {
+      console.error('Error creating service:', error);
       throw error;
     }
   };
@@ -123,6 +167,61 @@ function AppContent() {
     }
   };
 
+  const handleServiceContact = async (service) => {
+    if (!currentUser) {
+      alert('Please sign in to contact the service provider');
+      return;
+    }
+
+    if (!service) {
+      console.error('Invalid service object:', service);
+      alert('Invalid service. Please try again.');
+      return;
+    }
+
+    try {
+      console.log('Service object:', service);
+      console.log('Current user:', currentUser.uid);
+      
+      // Check if user already requested this service
+      const requestors = Array.isArray(service.requestors) ? service.requestors : [];
+      console.log('Requestors array:', requestors);
+      
+      const alreadyRequested = requestors.some(req => req.userId === currentUser.uid);
+      if (alreadyRequested) {
+        alert('You have already requested this service');
+        return;
+      }
+
+      // Use the Firestore document ID
+      const serviceRef = doc(db, 'services', service.id);
+      const newRequestor = {
+        userId: currentUser.uid,
+        userEmail: userProfile?.email || currentUser.email,
+        userFullName: userProfile?.fullName || currentUser.displayName || 'User',
+        requestDate: new Date().toISOString()
+      };
+
+      console.log('New requestor:', newRequestor);
+      console.log('Updated requestors array:', [...requestors, newRequestor]);
+
+      await updateDoc(serviceRef, {
+        requestors: [...requestors, newRequestor]
+      });
+
+      alert('Service request sent successfully!');
+    } catch (error) {
+      console.error('Error sending service request:', error);
+      console.error('Error details:', {
+        service: service,
+        currentUser: currentUser?.uid,
+        userProfile: userProfile
+      });
+      alert('Failed to send service request. Please try again.');
+    }
+  };
+
+
   // Handle listing favorite
   const handleFavorite = (listingId) => {
     // You can implement favorite functionality here
@@ -164,6 +263,45 @@ function AppContent() {
     }
   };
 
+  // Handle service favorite
+  const handleServiceFavorite = (serviceId) => {
+    console.log('Favoriting service:', serviceId);
+  };
+
+  // Handle service share
+  const handleServiceShare = (service) => {
+    console.log('Sharing service:', service.title);
+  };
+
+  // Handle service matching with requestor
+  const handleServiceMatch = async (serviceId, requestor) => {
+    try {
+      const serviceRef = doc(db, 'services', serviceId);
+      await updateDoc(serviceRef, {
+        matchedWith: requestor,
+        status: 'matched'
+      });
+      alert('Successfully matched with service requestor!');
+    } catch (error) {
+      console.error('Error matching with service requestor:', error);
+      alert('Failed to match with service requestor. Please try again.');
+    }
+  };
+
+  // Handle marking service as completed
+  const handleServiceComplete = async (serviceId) => {
+    try {
+      const serviceRef = doc(db, 'services', serviceId);
+      await updateDoc(serviceRef, {
+        status: 'completed'
+      });
+      alert('Service marked as completed!');
+    } catch (error) {
+      console.error('Error completing service:', error);
+      alert('Failed to mark service as completed. Please try again.');
+    }
+  };
+
   return (
     <Router basename="/GoodNeighbor">
       <Routes>
@@ -193,6 +331,29 @@ function AppContent() {
             </ProtectedRoute>
           } 
         />
+        {/*<Route 
+          path="/servicespage" 
+          element={
+          <ServicesPage 
+            services={services}
+            loading={servicesLoading}
+            onContact={handleServiceContact}
+            onFavorite={handleServiceFavorite}
+            onShare={handleServiceShare}
+            onMatch={handleServiceMatch}
+            onComplete={handleServiceComplete}
+            currentUserId={currentUser?.uid}
+          />
+          } 
+        />
+        <Route 
+          path="/createservice" 
+          element={
+            <ProtectedRoute>
+              <CreateService onCreate={handleCreateService} />
+            </ProtectedRoute>
+          } 
+        />*/}
         <Route 
           path="/account" 
           element={

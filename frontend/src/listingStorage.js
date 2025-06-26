@@ -1,6 +1,6 @@
 import { collection, addDoc, doc, updateDoc, deleteDoc, getDoc, getDocs, query, where, orderBy, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { db, auth, storage } from '../firebaseConfig';
+import { db, auth, storage } from './firebaseConfig.js';
 
 /*Compress image file*/
 const compressImage = (file, maxWidth = 1200, maxHeight = 1200, quality = 0.8) => {

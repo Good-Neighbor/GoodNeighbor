@@ -1,7 +1,7 @@
 import './StartPage.css';
 import { useNavigate } from 'react-router-dom';
 import React from 'react';
-import { useAuth } from '../components/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 
 function StartPage() {
   const navigate = useNavigate();
@@ -32,15 +32,30 @@ function StartPage() {
               className="start-button secondary"
               onClick={() => navigate("/listingspage")}
             >
-              Browse Listings
+              Browse Item Listings
             </button>
+
+            {/*<button 
+              className="start-button secondary"
+              onClick={() => navigate("/servicespage")}
+            >
+              Browse Services
+            </button>*/}
             
             <button 
               className="start-button secondary"
               onClick={() => navigate("/createlistings")}
             >
-              Create Listing
+              Create Item Listing
             </button>
+
+            {/*<button 
+              className="start-button secondary"
+              onClick={() => navigate("/createservices")}
+            >
+              Create Service
+            </button>*/}
+
             {user && (
               <button 
                 className="start-button secondary"
