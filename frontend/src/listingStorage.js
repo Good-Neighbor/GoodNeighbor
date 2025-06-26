@@ -2,26 +2,81 @@ import { collection, addDoc, doc, updateDoc, deleteDoc, getDoc, getDocs, query, 
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, auth, storage } from '../firebaseConfig';
 
-/**
- * Upload photos for a listing
- * @param {string} listingId - The ID of the listing
- * @param {FileList|File[]} files - Array of image files to upload
- * @param {Function} onProgress - Optional callback for upload progress
- * @returns {Promise<Array>} Array of photo objects with URLs and metadata
- */
+/*Compress image file*/
+const compressImage = (file, maxWidth = 1200, maxHeight = 1200, quality = 0.8) => {
+  return new Promise((resolve, reject) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    
+    img.onload = () => {
+      // Calculate new dimensions while maintaining aspect ratio
+      let { width, height } = img;
+      
+      if (width > height) {
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width = (width * maxHeight) / height;
+          height = maxHeight;
+        }
+      }
+      
+      // Set canvas dimensions
+      canvas.width = width;
+      canvas.height = height;
+      
+      // Draw and compress the image
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error('Canvas to Blob conversion failed'));
+          }
+        },
+        'image/jpeg',
+        quality
+      );
+    };
+    
+    img.onerror = () => {
+      reject(new Error('Image loading failed'));
+    };
+    
+    img.src = URL.createObjectURL(file);
+  });
+};
+
+/*Upload file*/
 export const uploadListingPhotos = async (listingId, files, onProgress = null) => {
   try {
     const uploadPromises = Array.from(files).map(async (file, index) => {
-      // Create a unique filename
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        throw new Error(`File ${file.name} is not an image`);
+      }
+      
+      // Create unique filename
       const timestamp = Date.now();
-      const fileName = `${timestamp}_${index}_${file.name}`;
-      const storageRef = ref(storage, `listings/${listingId}/photos/${fileName}`);
+      const fileExtension = 'jpg'; // We'll convert all to JPEG for consistency
+      const baseFileName = `${timestamp}_${index}`;
       
-      // Upload file
-      const snapshot = await uploadBytes(storageRef, file);
+      // Compress the main image
+      const compressedImage = await compressImage(file, 1200, 1200, 0.8);
+      const compressedFile = new File([compressedImage], `${baseFileName}.${fileExtension}`, {
+        type: 'image/jpeg'
+      });
       
-      // Get download URL
-      const downloadURL = await getDownloadURL(snapshot.ref);
+      // Upload main image
+      const mainImageRef = ref(storage, `listings/${listingId}/photos/${compressedFile.name}`);
+      const mainSnapshot = await uploadBytes(mainImageRef, compressedFile);
+      const mainImageURL = await getDownloadURL(mainSnapshot.ref);
       
       // Call progress callback if provided
       if (onProgress) {
@@ -29,9 +84,15 @@ export const uploadListingPhotos = async (listingId, files, onProgress = null) =
       }
       
       return {
-        url: downloadURL,
-        fileName: fileName,
-        path: snapshot.ref.fullPath,
+        url: mainImageURL,
+        thumbnailUrl: thumbnailURL,
+        fileName: compressedFile.name,
+        thumbnailFileName: thumbnailFile.name,
+        path: mainSnapshot.ref.fullPath,
+        thumbnailPath: thumbnailSnapshot.ref.fullPath,
+        originalFileName: file.name,
+        originalSize: file.size,
+        compressedSize: compressedImage.size,
         uploadedAt: new Date()
       };
     });
@@ -45,11 +106,7 @@ export const uploadListingPhotos = async (listingId, files, onProgress = null) =
   }
 };
 
-/**
- * Delete a photo from storage and Firestore
- * @param {string} listingId - The ID of the listing
- * @param {Object} photoData - Photo object with path and url
- */
+/*Delete a photo from storage and Firestore*/
 export const deleteListingPhoto = async (listingId, photoData) => {
   try {
     // Delete from Storage
@@ -69,13 +126,7 @@ export const deleteListingPhoto = async (listingId, photoData) => {
   }
 };
 
-/**
- * Create a new listing with photos
- * @param {Object} listingData - The listing data to store
- * @param {FileList|File[]} photoFiles - Optional array of photo files
- * @param {Function} onProgress - Optional callback for upload progress
- * @returns {Promise<string>} The ID of the created listing
- */
+/*Create a new listing with photos*/
 export const createListingWithPhotos = async (listingData, photoFiles = [], onProgress = null) => {
   try {
     const user = auth.currentUser;
@@ -122,13 +173,7 @@ export const createListingWithPhotos = async (listingData, photoFiles = [], onPr
   }
 };
 
-/**
- * Update an existing listing
- * @param {string} listingId - The ID of the listing to update
- * @param {Object} updateData - The data to update
- * @param {FileList|File[]} newPhotoFiles - Optional new photos to add
- * @param {Function} onProgress - Optional callback for upload progress
- */
+/*Update an existing listing*/
 export const updateListing = async (listingId, updateData, newPhotoFiles = [], onProgress = null) => {
   try {
     const user = auth.currentUser;
@@ -171,10 +216,7 @@ export const updateListing = async (listingId, updateData, newPhotoFiles = [], o
   }
 };
 
-/**
- * Delete a listing and all its photos
- * @param {string} listingId - The ID of the listing to delete
- */
+/*Delete a listing and all its photos*/
 export const deleteListing = async (listingId) => {
   try {
     const user = auth.currentUser;
@@ -214,11 +256,7 @@ export const deleteListing = async (listingId) => {
   }
 };
 
-/**
- * Get a single listing by ID
- * @param {string} listingId - The ID of the listing
- * @returns {Promise<Object>} The listing data
- */
+/*Get a single listing by ID*/
 export const getListing = async (listingId) => {
   try {
     const listingDoc = await getDoc(doc(db, 'listings', listingId));
@@ -238,10 +276,7 @@ export const getListing = async (listingId) => {
   }
 };
 
-/**
- * Get all listings for the current user
- * @returns {Promise<Array>} Array of user's listings
- */
+/*Get all listings for the current user*/
 export const getUserListings = async () => {
   try {
     const user = auth.currentUser;
@@ -273,11 +308,7 @@ export const getUserListings = async () => {
   }
 };
 
-/**
- * Get all active listings (for browsing)
- * @param {Object} filters - Optional filters
- * @returns {Promise<Array>} Array of active listings
- */
+/*Get all active listings (for browsing)*/
 export const getAllListings = async (filters = {}) => {
   try {
     let q = query(
@@ -314,14 +345,9 @@ export const getAllListings = async (filters = {}) => {
   }
 };
 
-/**
- * Search listings by title or description
- * @param {string} searchTerm - The search term
- * @returns {Promise<Array>} Array of matching listings
- */
+/*Search listings by title or description*/
 export const searchListings = async (searchTerm) => {
   try {
-    // Note: This is a basic implementation. For better search, consider using Algolia or similar
     const q = query(
       collection(db, 'listings'),
       where('status', '==', 'active'),
