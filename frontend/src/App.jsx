@@ -52,7 +52,7 @@ function AppContent() {
       setLoading(false);
     });
 
-    const unsubscribeServices = onSnapshot(collection(db, 'services'), (snapshot) => {
+    {/*const unsubscribeServices = onSnapshot(collection(db, 'services'), (snapshot) => {
       const servicesData = snapshot.docs.map(doc => {
         const data = doc.data();
         const { id: customId, ...serviceData } = data;
@@ -66,101 +66,13 @@ function AppContent() {
     }, (error) => {
       console.error('Error fetching services:', error);
       setServicesLoading(false);
-    });
+    });*/}
 
     return () => {
       unsubscribeListings();
-      unsubscribeServices();
+      //unsubscribeServices();
     };
   }, []);
-
-  const compressImage = (file, maxWidth = 1200, maxHeight = 1200, quality = 0.8) => {
-    return new Promise((resolve, reject) => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const img = new Image();
-      
-      img.onload = () => {
-        let { width, height } = img;
-        
-        if (width > height) {
-          if (width > maxWidth) {
-            height = (height * maxWidth) / width;
-            width = maxWidth;
-          }
-        } else {
-          if (height > maxHeight) {
-            width = (width * maxHeight) / height;
-            height = maxHeight;
-          }
-        }
-        
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(img, 0, 0, width, height);
-        
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              resolve(blob);
-            } else {
-              reject(new Error('Canvas to Blob conversion failed'));
-            }
-          },
-          'image/jpeg',
-          quality
-        );
-      };
-      
-      img.onerror = () => reject(new Error('Image loading failed'));
-      img.src = URL.createObjectURL(file);
-    });
-  };
-
-  const uploadPhotos = async (listingId, files, onProgress = null) => {
-    if (!files || files.length === 0) return [];
-    
-    try {
-      const uploadPromises = Array.from(files).map(async (file, index) => {
-        if (!file.type.startsWith('image/')) {
-          throw new Error(`File ${file.name} is not an image`);
-        }
-        
-        const timestamp = Date.now();
-        const fileName = `${timestamp}_${index}.jpg`;
-        
-        // Compress image
-        const compressedImage = await compressImage(file, 1200, 1200, 0.8);
-        const compressedFile = new File([compressedImage], fileName, {
-          type: 'image/jpeg'
-        });
-        
-        // Upload to Firebase Storage
-        const storageRef = ref(storage, `listings/${listingId}/photos/${fileName}`);
-        const snapshot = await uploadBytes(storageRef, compressedFile);
-        const downloadURL = await getDownloadURL(snapshot.ref);
-        
-        if (onProgress) {
-          onProgress(index + 1, files.length);
-        }
-        
-        return {
-          url: downloadURL,
-          fileName: fileName,
-          path: snapshot.ref.fullPath,
-          originalFileName: file.name,
-          originalSize: file.size,
-          compressedSize: compressedImage.size,
-          uploadedAt: new Date()
-        };
-      });
-      
-      return await Promise.all(uploadPromises);
-    } catch (error) {
-      console.error('Error uploading photos:', error);
-      throw error;
-    }
-  };
 
   // Create new listing
   const handleCreateListing = async (newListing, photoFiles = []) => {
@@ -202,7 +114,7 @@ function AppContent() {
     }
   };  
 
-  const handleCreateService = async (newService, photoFiles = []) => {
+  {/*const handleCreateService = async (newService, photoFiles = []) => {
     try {
       const serviceWithMetadata = {
         ...newService,
@@ -239,32 +151,7 @@ function AppContent() {
       console.error('Error creating service:', error);
       throw error;
     }
-  };  
-
-  const deletePhoto = async (photoData, collectionName, documentId) => {
-    try {
-      // Delete from Storage
-      const photoRef = ref(storage, photoData.path);
-      await deleteObject(photoRef);
-      
-      // Remove from Firestore document
-      const docRef = doc(db, collectionName, documentId);
-      const docSnap = await getDoc(docRef);
-      
-      if (docSnap.exists()) {
-        const currentPhotos = docSnap.data().photos || [];
-        const updatedPhotos = currentPhotos.filter(photo => photo.path !== photoData.path);
-        
-        await updateDoc(docRef, {
-          photos: updatedPhotos,
-          updatedAt: new Date()
-        });
-      }
-    } catch (error) {
-      console.error('Error deleting photo:', error);
-      throw error;
-    }
-  };
+  };*/}
 
   // Handle listing contact (add requestor)
   const handleContact = async (listing) => {
