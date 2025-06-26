@@ -59,12 +59,12 @@ function About() {
           <h2 className="about-section-title">About Us</h2>
           <div className="about-section-text">
             <p>
-              Welcome to Good Neighbor! This is a community-driven marketplace where you can exchange goods and services with members of your community. As a kind reminder from the Good Neighbor team, please be mindful of both giving and receiving. This project is only sustainable if we all do our part to keep it going. Our dream is to not only create a platform for people to exchange, but to create a stronger, more connected community.
+              Welcome to Good Neighbor! This is a community-driven marketplace where you can exchange goods and services with members of your community. As a kind reminder from Good Neighbor, please be mindful of both giving and receiving. This project is only sustainable if we all do our part to keep it going. Our dream is to not only create a platform for people to exchange, but to create a stronger, more connected community.
             </p>
           </div>
         </div>
         <div className="about-section">
-          <h2 className="about-section-title">Co-Founders</h2>
+          <h2 className="about-section-title">Team</h2>
           <div className="co-founders-list">
             <a href="https://www.instagram.com/_michael.yang/" target="_blank" rel="noopener noreferrer" className="co-founder-link">
               <div className="co-founder">

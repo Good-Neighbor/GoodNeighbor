@@ -12,13 +12,22 @@ function CreateListing({ onCreate }){
         location: "",
         category: categories[0],
         condition: "Good",
-        description: ""
+        description: "",
+        serviceType: "Tutoring"
     });
 
     const [photos, setPhotos] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
-    const [errors, setErrors] = useState({}); 
+    const [errors, setErrors] = useState({});
+    const [listingType, setListingType] = useState('item'); // 'item' or 'service'
+    const serviceTypes = [
+        'Tutoring',
+        'Volunteer Opportunity',
+        'Yardwork',
+        'Pet Care',
+        'Other'
+    ];
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -51,19 +60,25 @@ function CreateListing({ onCreate }){
             newErrors.location = "Location is required.";
             isValid = false;
         }
-        if (!form.category) {
-            newErrors.category = "Category is required.";
-            isValid = false;
-        }
-        if (!form.condition) {
-            newErrors.condition = "Condition is required.";
-            isValid = false;
-        }
         if (!form.description.trim()) {
             newErrors.description = "Description is required."; 
             isValid = false;
         }
-        
+        if (listingType === 'item') {
+            if (!form.category) {
+                newErrors.category = "Category is required.";
+                isValid = false;
+            }
+            if (!form.condition) {
+                newErrors.condition = "Condition is required.";
+                isValid = false;
+            }
+        } else if (listingType === 'service') {
+            if (!form.serviceType) {
+                newErrors.serviceType = "Service type is required.";
+                isValid = false;
+            }
+        }
         setErrors(newErrors);
         return isValid;
     };
@@ -73,45 +88,49 @@ function CreateListing({ onCreate }){
         if (!validateForm()) { 
             return;
         }
-        
         setIsSubmitting(true);
-        setUploadProgress({ current: 0, total: photos.length });
-        
+        setUploadProgress({ current: 0, total: listingType === 'item' ? photos.length : 0 });
         try{
-            // Create listing with photos using Firebase
-            const listingId = await createListingWithPhotos(
-                form,
-                photos,
-                (current, total) => setUploadProgress({ current, total })
-            );
-
-            // Call the onCreate prop if provided (for backward compatibility)
-            if (onCreate) {
-                const newListing = {
-                    id: listingId,
-                    ...form,
-                    datePosted: new Date().toISOString(),
-                    status: "available",
-                    photos: photos.length > 0 ? photos.map(file => file.name) : []
+            let listingId = null;
+            if (listingType === 'item') {
+                // Create item listing with photos
+                listingId = await createListingWithPhotos(
+                    { ...form, type: 'item' },
+                    photos,
+                    (current, total) => setUploadProgress({ current, total })
+                );
+            } else {
+                // Create service listing (no photos)
+                const { title, description, location, serviceType } = form;
+                const newService = {
+                    title,
+                    description,
+                    location,
+                    serviceType,
+                    type: 'service',
+                    createdAt: new Date(),
+                    status: 'available',
+                    requestors: [],
+                    matchedWith: null
                 };
-                await onCreate(newListing);
+                if (onCreate) {
+                    await onCreate(newService);
+                }
             }
-
             // Reset form
             setForm({
                 title: "",
                 description: "",
                 location: "",
                 category: categories[0],
-                condition: "Good"
+                condition: "Good",
+                serviceType: serviceTypes[0]
             });
             setPhotos([]);
             setErrors({});
             setUploadProgress({ current: 0, total: 0 });
-            
             alert("Listing created successfully!");
             navigate('/');
-            
         } catch (error) {
             console.error("Error creating listing:", error);
             alert("Failed to create listing. Please try again.");
@@ -136,9 +155,31 @@ function CreateListing({ onCreate }){
                 </button>
                 <div className="create-listing-header">
                     <h1>Create New Listing</h1>
-                    <p>Share items you no longer need with your community - completely free!</p>
+                    <p>Share items or services you can offer to your community - completely free!</p>
                 </div>
-
+                {/* Listing Type Toggle */}
+                <div className="listing-type-toggle">
+                    <label className={listingType === 'item' ? 'selected' : ''}>
+                        <input
+                            type="radio"
+                            name="listingType"
+                            value="item"
+                            checked={listingType === 'item'}
+                            onChange={() => setListingType('item')}
+                        />
+                        <span>Item</span>
+                    </label>
+                    <label className={listingType === 'service' ? 'selected' : ''}>
+                        <input
+                            type="radio"
+                            name="listingType"
+                            value="service"
+                            checked={listingType === 'service'}
+                            onChange={() => setListingType('service')}
+                        />
+                        <span>Service</span>
+                    </label>
+                </div>
                 <form onSubmit={handleSubmit} className="create-listing-form">
                     {/* Title */}
                     <div className="form-group">
@@ -149,13 +190,12 @@ function CreateListing({ onCreate }){
                             name="title"
                             value={form.title}
                             onChange={handleInputChange}
-                            placeholder="What are you giving away?"
+                            placeholder={listingType === 'item' ? "What are you giving away?" : "What service are you offering?"}
                             maxLength="100"
                             className={errors.title ? "error" : ""}
                         />
                         {errors.title && <span className="error-message">{errors.title}</span>}
                     </div>
-
                     {/* Description */}
                     <div className="form-group">
                         <label htmlFor="description">Description *</label>
@@ -164,7 +204,7 @@ function CreateListing({ onCreate }){
                             name="description"
                             value={form.description}
                             onChange={handleInputChange}
-                            placeholder="Describe the item's condition, any flaws, pickup instructions, etc."
+                            placeholder={listingType === 'item' ? "Describe the item's condition, any flaws, pickup instructions, etc." : "Describe the service, requirements, schedule, etc."}
                             rows="4"
                             maxLength="500"
                             className={errors.description ? "error" : ""}
@@ -174,108 +214,110 @@ function CreateListing({ onCreate }){
                         </div>
                         {errors.description && <span className="error-message">{errors.description}</span>}
                     </div>
-
-                    {/* Category */}
-                    <div className="form-group">
-                        <label htmlFor="category">Category</label>
-                        <select
-                            id="category"
-                            name="category"
-                            value={form.category}
-                            onChange={handleInputChange}
-                        >
-                            {categories.map(category => (
-                                <option key={category} value={category}>
-                                    {category}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Condition */}
-                    <div className="form-group">
-                        <label htmlFor="condition">Condition</label>
-                        <select
-                            id="condition"
-                            name="condition"
-                            value={form.condition}
-                            onChange={handleInputChange}
-                        >
-                            <option value="">Select condition</option>
-                            <option value="Like New">Like New</option>
-                            <option value="Good">Good</option>
-                            <option value="Fair">Fair</option>
-                            <option value="Poor">Poor</option>
-                        </select>
-                    </div>
-
+                    {/* Service Type (for services) */}
+                    {listingType === 'service' && (
+                        <div className="form-group">
+                            <label htmlFor="serviceType">Service Type *</label>
+                            <select
+                                id="serviceType"
+                                name="serviceType"
+                                value={form.serviceType || serviceTypes[0]}
+                                onChange={handleInputChange}
+                                className={errors.serviceType ? "error" : ""}
+                            >
+                                {serviceTypes.map(type => (
+                                    <option key={type} value={type}>{type}</option>
+                                ))}
+                            </select>
+                            {errors.serviceType && <span className="error-message">{errors.serviceType}</span>}
+                        </div>
+                    )}
+                    {/* Category (for items) */}
+                    {listingType === 'item' && (
+                        <div className="form-group">
+                            <label htmlFor="category">Category</label>
+                            <select
+                                id="category"
+                                name="category"
+                                value={form.category}
+                                onChange={handleInputChange}
+                            >
+                                {categories.map(category => (
+                                    <option key={category} value={category}>
+                                        {category}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+                    {/* Condition (for items) */}
+                    {listingType === 'item' && (
+                        <div className="form-group">
+                            <label htmlFor="condition">Condition</label>
+                            <select
+                                id="condition"
+                                name="condition"
+                                value={form.condition}
+                                onChange={handleInputChange}
+                            >
+                                <option value="">Select condition</option>
+                                <option value="Like New">Like New</option>
+                                <option value="Good">Good</option>
+                                <option value="Fair">Fair</option>
+                                <option value="Poor">Poor</option>
+                            </select>
+                        </div>
+                    )}
+                    {/* Photo Upload (for items) */}
+                    {listingType === 'item' && (
+                        <div className="form-group">
+                            <label htmlFor="photos">Photos</label>
+                            <label htmlFor="photos" className="image-upload-label">
+                                <span role="img" aria-label="camera" style={{ marginRight: 8 }}>📷</span>
+                                {photos.length > 0 ? `${photos.length} photo${photos.length > 1 ? 's' : ''} selected` : 'Choose Photos'}
+                            </label>
+                            <input
+                                type="file"
+                                id="photos"
+                                name="photos"
+                                accept="image/*"
+                                multiple
+                                onChange={handlePhotoSelect}
+                                disabled={isSubmitting}
+                                className="image-input"
+                            />
+                            {photos.length > 0 && (
+                                <div className="image-preview-list">
+                                    {photos.map((file, idx) => (
+                                        <div key={idx} className="image-preview-item">
+                                            <span className="image-preview-name">{file.name}</span>
+                                            <span className="image-preview-size">({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            {errors.photos && <span className="error-message">{errors.photos}</span>}
+                            {uploadProgress.total > 0 && (
+                                <div className="upload-progress">
+                                    Uploading {uploadProgress.current} of {uploadProgress.total} photos...
+                                </div>
+                            )}
+                        </div>
+                    )}
                     {/* Location */}
                     <div className="form-group">
-                        <label htmlFor="location">Pickup Location *</label>
+                        <label htmlFor="location">{listingType === 'item' ? 'Pickup Location *' : 'Service Location *'}</label>
                         <input
                             type="text"
                             id="location"
                             name="location"
                             value={form.location}
                             onChange={handleInputChange}
-                            placeholder="City, State or general area"
+                            placeholder={listingType === 'item' ? 'City, State or general area' : 'Where is the service provided?'}
                             className={errors.location ? "error" : ""}
                         />
                         {errors.location && <span className="error-message">{errors.location}</span>}
                     </div>
-
-                    {/* Photos */}
-                    <div className="form-group">
-                        <label htmlFor="photos">Photos</label>
-                        <input
-                            type="file"
-                            id="photos"
-                            multiple
-                            accept="image/*"
-                            onChange={handlePhotoSelect}
-                            className="photo-input"
-                        />
-                        <div className="photo-help-text">
-                            <small>You can select multiple photos (optional)</small>
-                        </div>
-                        
-                        {/* Photo Preview */}
-                        {photos.length > 0 && (
-                            <div className="photo-preview">
-                                <p>{photos.length} photo{photos.length > 1 ? 's' : ''} selected:</p>
-                                <div className="photo-list">
-                                    {photos.map((file, index) => (
-                                        <div key={index} className="photo-item">
-                                            <span className="photo-name">{file.name}</span>
-                                            <span className="photo-size">
-                                                ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                        
-                        {/* Upload Progress */}
-                        {isSubmitting && photos.length > 0 && (
-                            <div className="upload-progress">
-                                <div className="progress-bar">
-                                    <div 
-                                        className="progress-fill" 
-                                        style={{ 
-                                            width: `${(uploadProgress.current / uploadProgress.total) * 100}%` 
-                                        }}
-                                    ></div>
-                                </div>
-                                <span className="progress-text">
-                                    Uploading photos: {uploadProgress.current} of {uploadProgress.total}
-                                </span>
-                            </div>
-                        )}
-                        
-                        {errors.photos && <span className="error-message">{errors.photos}</span>}
-                    </div>
-
                     {/* Submit Button */}
                     <div className="form-actions">
                         <button
