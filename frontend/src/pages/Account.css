@@ -867,3 +867,69 @@
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(66, 184, 131, 0.3);
 } 
+
+.listing-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.delete-listing-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.delete-listing-btn:hover {
+  background-color: #c82333;
+}
+
+.delete-confirmation {
+  text-align: center;
+}
+
+.warning-text {
+  color: #dc3545;
+  font-weight: bold;
+  margin: 16px 0;
+}
+
+.delete-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.cancel-btn {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.delete-confirm-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.delete-confirm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.delete-confirm-btn.loading {
+  background-color: #c82333;
+}
