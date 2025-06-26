@@ -111,7 +111,7 @@ function CreateListing({ onCreate }){
             setUploadProgress({ current: 0, total: 0 });
             
             alert("Listing created successfully!");
-            navigate('/listingspage');
+            navigate('/');
             
         } catch (error) {
             console.error("Error creating listing:", error);

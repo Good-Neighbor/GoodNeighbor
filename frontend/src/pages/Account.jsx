@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { collection, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebaseConfig';
+import { db, getStats } from '../firebaseConfig';
 import './Account.css';
 
 function Account() {
@@ -22,6 +22,24 @@ function Account() {
     const [matchedUsers, setMatchedUsers] = useState({});
     const [contactStates, setContactStates] = useState({});
     const [contactShared, setContactShared] = useState({});
+    const [stats, setStats] = useState({ accounts: 0, listings: 0 });
+    const [statsLoading, setStatsLoading] = useState(true);
+
+    // Fetch stats on mount
+    useEffect(() => {
+        async function fetchStats() {
+            setStatsLoading(true);
+            try {
+                const data = await getStats();
+                setStats(data);
+            } catch (e) {
+                setStats({ accounts: 0, listings: 0 });
+            } finally {
+                setStatsLoading(false);
+            }
+        }
+        fetchStats();
+    }, []);
 
     // Fetch user's listings
     useEffect(() => {

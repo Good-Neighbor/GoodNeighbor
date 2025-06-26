@@ -18,29 +18,36 @@ function ListingsPage({ listings = [], onContact, onFavorite, onShare, onMatch, 
     const [sortBy, setSortBy] = useState("newest");
     const [viewMode, setViewMode] = useState("grid"); // grid or list
     const [showFilters, setShowFilters] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 18;
 
     // Filter and sort listings
     const filteredAndSortedListings = useMemo(() => {
-        let filtered = listings.filter(listing => {
-            // Filter by category
-            const categoryMatch = selectedCategory === "All" || listing.category === selectedCategory;
-            
-            // Filter by search query
-            const searchMatch = !searchQuery || 
-                listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                listing.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                listing.location.toLowerCase().includes(searchQuery.toLowerCase());
-            
-            return categoryMatch && searchMatch;
-        });
+        let filtered = listings;
 
-        // Sort listings
+        // Apply category filter
+        if (selectedCategory !== "All") {
+            filtered = filtered.filter(listing => listing.category === selectedCategory);
+        }
+
+        // Apply search filter
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            filtered = filtered.filter(listing =>
+                listing.title.toLowerCase().includes(query) ||
+                listing.description.toLowerCase().includes(query) ||
+                listing.location.toLowerCase().includes(query) ||
+                listing.category.toLowerCase().includes(query)
+            );
+        }
+
+        // Apply sorting
         filtered.sort((a, b) => {
             switch (sortBy) {
                 case "newest":
-                    return new Date(b.datePosted) - new Date(a.datePosted);
+                    return new Date(b.createdAt || b.datePosted) - new Date(a.createdAt || a.datePosted);
                 case "oldest":
-                    return new Date(a.datePosted) - new Date(b.datePosted);
+                    return new Date(a.createdAt || a.datePosted) - new Date(b.createdAt || b.datePosted);
                 case "title":
                     return a.title.localeCompare(b.title);
                 case "category":
@@ -52,6 +59,22 @@ function ListingsPage({ listings = [], onContact, onFavorite, onShare, onMatch, 
 
         return filtered;
     }, [listings, selectedCategory, searchQuery, sortBy]);
+
+    // Calculate pagination
+    const totalPages = Math.ceil(filteredAndSortedListings.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedListings = filteredAndSortedListings.slice(startIndex, endIndex);
+
+    // Reset to first page when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [selectedCategory, searchQuery, sortBy]);
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     const handleCategoryChange = (category) => {
         setSelectedCategory(category);
@@ -294,7 +317,7 @@ function ListingsPage({ listings = [], onContact, onFavorite, onShare, onMatch, 
                     </div>
                 ) : filteredAndSortedListings.length > 0 ? (
                     <div className={`listings-grid ${viewMode}`}>
-                        {filteredAndSortedListings.map(listing => (
+                        {paginatedListings.map(listing => (
                             <Listing
                                 key={listing.id}
                                 listing={listing}
@@ -337,6 +360,29 @@ function ListingsPage({ listings = [], onContact, onFavorite, onShare, onMatch, 
                     </div>
                 )}
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="pagination-controls">
+                    <button
+                        className={`page-btn ${currentPage === 1 ? "disabled" : ""}`}
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                    >
+                        Previous
+                    </button>
+                    <span className="page-info">
+                        Page {currentPage} of {totalPages}
+                    </span>
+                    <button
+                        className={`page-btn ${currentPage === totalPages ? "disabled" : ""}`}
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

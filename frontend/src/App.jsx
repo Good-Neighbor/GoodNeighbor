@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { collection, addDoc, getDocs, onSnapshot, updateDoc, doc } from 'firebase/firestore';
-import { db } from './firebaseConfig';
+import { db, incrementStat } from './firebaseConfig';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import StartPage from './pages/StartPage';
 import SignIn from './pages/SignIn';
@@ -9,8 +9,10 @@ import SignUp from './pages/SignUp';
 import ListingsPage from './pages/ListingsPage';  
 import CreateListings from './pages/CreateListings';
 import Account from './pages/Account';
+import About from './pages/About';
 {/*import ServicesPage from './pages/ServicesPage';
 import CreateService from './pages/CreateService';*/}
+
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -84,6 +86,8 @@ function AppContent() {
         matchedWith: null,
         status: 'available'
       });
+      // Increment listing stat
+      await incrementStat('listings');
       console.log('Listing created with ID:', docRef.id);
     } catch (error) {
       console.error('Error creating listing:', error);
@@ -362,6 +366,7 @@ function AppContent() {
             </ProtectedRoute>
           } 
         />
+        <Route path="/about" element={<About />} />
       </Routes>
     </Router>
   );
