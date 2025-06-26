@@ -68,6 +68,30 @@ function Listing({
         }
     };
 
+    // Get type flair class
+    const getTypeFlairClass = (type) => {
+        switch (type?.toLowerCase()) {
+            case 'service':
+                return 'type-flair-service';
+            case 'item':
+                return 'type-flair-item';
+            default:
+                return 'type-flair-item';
+        }
+    };
+
+    // Get type flair icon and text
+    const getTypeFlairContent = (type) => {
+        switch (type?.toLowerCase()) {
+            case 'service':
+                return { icon: '🛠️', text: 'Service' };
+            case 'item':
+                return { icon: '📦', text: 'Item' };
+            default:
+                return { icon: '📦', text: 'Item' };
+        }
+    };
+
     const handleImageError = () => {
         setImageError(true);
     };
@@ -133,12 +157,17 @@ function Listing({
 
     if (viewMode === 'list') {
         // Compact line view
+        const typeContent = getTypeFlairContent(listing.type);
         return (
             <div className="listing-row">
                 <div className="listing-row-main">
                     <div className="listing-row-title">{listing.title}</div>
                     <div className="listing-row-meta">
-                        <span className="listing-row-category">{listing.category}</span>
+                        <span className={`type-flair ${getTypeFlairClass(listing.type)}`}>
+                            {typeContent.icon} {typeContent.text}
+                        </span>
+                        <span className="listing-row-sep">•</span>
+                        <span className="listing-row-category">{listing.category || listing.serviceType}</span>
                         <span className="listing-row-sep">•</span>
                         <span className="listing-row-location">{listing.location}</span>
                         <span className="listing-row-sep">•</span>
@@ -197,6 +226,16 @@ function Listing({
                         {listing.status || 'Available'}
                     </div>
                 )}
+
+                {/* Type Flair Badge */}
+                {(() => {
+                    const typeContent = getTypeFlairContent(listing.type);
+                    return (
+                        <div className={`type-flair-badge ${getTypeFlairClass(listing.type)}`}>
+                            {typeContent.icon} {typeContent.text}
+                        </div>
+                    );
+                })()}
 
                 {/* Request Count Badge (for own listings) */}
                 {isOwnListing && requestCount > 0 && (
