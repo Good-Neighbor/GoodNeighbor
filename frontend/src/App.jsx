@@ -11,6 +11,7 @@ import CreateListings from './pages/CreateListings';
 import Account from './pages/Account';
 import About from './pages/About';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import imageCompression from 'browser-image-compression';
 
 
 // Protected Route component
@@ -54,6 +55,56 @@ function AppContent() {
     };
   }, []);
 
+  // Image compression function
+  const compressImage = async (file, options = {}) => {
+    const defaultOptions = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+      quality: 0.8,
+      ...options
+    };
+
+    try {
+      console.log('Original file size:', (file.size / 1024 / 1024).toFixed(2), 'MB');
+      const compressedFile = await imageCompression(file, defaultOptions);
+      console.log('Compressed file size:', (compressedFile.size / 1024 / 1024).toFixed(2), 'MB');
+      return compressedFile;
+    } catch (error) {
+      console.error('Image compression failed:', error);
+      return file; // Return original if compression fails
+    }
+  };
+
+  // Upload photos function
+  const uploadPhotos = async (listingId, photoFiles) => {
+    const uploadPromises = photoFiles.map(async (file, index) => {
+      try {
+        // Compress the image
+        const compressedFile = await compressImage(file);
+        
+        // Create storage reference
+        const fileName = `${listingId}_${index}_${Date.now()}.jpg`;
+        const photoRef = ref(storage, `listings/${listingId}/${fileName}`);
+        
+        // Upload compressed file
+        const snapshot = await uploadBytes(photoRef, compressedFile);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        
+        return {
+          url: downloadURL,
+          fileName: fileName,
+          originalName: file.name
+        };
+      } catch (error) {
+        console.error('Error uploading photo:', error);
+        throw error;
+      }
+    });
+
+    return Promise.all(uploadPromises);
+  };
+
   // Create new listing
   const handleCreateListing = async (newListing, photoFiles = []) => {
     try {
@@ -75,8 +126,9 @@ function AppContent() {
       const docRef = await addDoc(collection(db, 'listings'), listingWithMetadata);
       const listingId = docRef.id;
       
-      // Upload photos if provided
+      // Upload and compress photos if provided
       if (photoFiles && photoFiles.length > 0) {
+        console.log('Compressing and uploading', photoFiles.length, 'photos...');
         const uploadedPhotos = await uploadPhotos(listingId, photoFiles);
         
         // Update the listing document with photo URLs
@@ -84,6 +136,8 @@ function AppContent() {
           photos: uploadedPhotos,
           updatedAt: new Date()
         });
+        
+        console.log('Photos uploaded and compressed successfully');
       }
 
       console.log('Listing created with ID:', listingId);
@@ -92,7 +146,7 @@ function AppContent() {
       console.error('Error creating listing:', error);
       throw error;
     }
-  };  
+  }; 
 
   // Handle listing contact (add requestor)
   const handleContact = async (listing) => {

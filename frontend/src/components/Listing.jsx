@@ -193,70 +193,85 @@ function Listing({
     return (
         <div className="listing-card">
             {/* Image Section */}
-            <div className="listing-image-container">
-                {!imageError && listing.image ? (
-                    <>
-                        <img
-                            src={listing.image}
-                            alt={listing.title}
-                            className={`listing-image ${imageLoaded ? 'loaded' : ''}`}
-                            onLoad={handleImageLoad}
-                            onError={handleImageError}
-                        />
-                        {!imageLoaded && (
-                            <div className="image-placeholder">
-                                <div className="loading-spinner"></div>
+                <div className="listing-image-container">
+                    {(() => {
+                        // Handle both old format (single image) and new format (photos array)
+                        let imageUrl = null;
+                        
+                        if (listing.photos && listing.photos.length > 0) {
+                            // New format: array of photo objects
+                            imageUrl = typeof listing.photos[0] === 'string' 
+                                ? listing.photos[0] 
+                                : listing.photos[0].url;
+                        } else if (listing.image) {
+                            // Old format: single image URL
+                            imageUrl = listing.image;
+                        }
+
+                        return imageUrl && !imageError ? (
+                            <>
+                                <img
+                                    src={imageUrl}
+                                    alt={listing.title}
+                                    className={`listing-image ${imageLoaded ? 'loaded' : ''}`}
+                                    onLoad={handleImageLoad}
+                                    onError={handleImageError}
+                                />
+                                {!imageLoaded && (
+                                    <div className="image-placeholder">
+                                        <div className="loading-spinner"></div>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="image-placeholder no-image">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                                    <polyline points="21,15 16,10 5,21"/>
+                                </svg>
+                                <span>No Image</span>
                             </div>
-                        )}
-                    </>
-                ) : (
-                    <div className="image-placeholder no-image">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                            <circle cx="8.5" cy="8.5" r="1.5"/>
-                            <polyline points="21,15 16,10 5,21"/>
-                        </svg>
-                        <span>No Image</span>
-                    </div>
-                )}
+                        );
+                    })()}
 
-                {/* Status Badge */}
-                {(listing.status === 'available' || listing.status === 'claimed') && (
-                    <div className={`status-badge ${getStatusClass(listing.status)}`}>
-                        {listing.status || 'Available'}
-                    </div>
-                )}
-
-                {/* Type Flair Badge */}
-                {(() => {
-                    const typeContent = getTypeFlairContent(listing.type);
-                    return (
-                        <div className={`type-flair-badge ${getTypeFlairClass(listing.type)}`}>
-                            {typeContent.icon} {typeContent.text}
+                    {/* Status Badge */}
+                    {(listing.status === 'available' || listing.status === 'claimed') && (
+                        <div className={`status-badge ${getStatusClass(listing.status)}`}>
+                            {listing.status || 'Available'}
                         </div>
-                    );
-                })()}
+                    )}
 
-                {/* Request Count Badge (for own listings) */}
-                {isOwnListing && requestCount > 0 && (
-                    <div className="request-count-badge">
-                        {requestCount} request{requestCount !== 1 ? 's' : ''}
-                    </div>
-                )}
+                    {/* Type Flair Badge */}
+                    {(() => {
+                        const typeContent = getTypeFlairContent(listing.type);
+                        return (
+                            <div className={`type-flair-badge ${getTypeFlairClass(listing.type)}`}>
+                                {typeContent.icon} {typeContent.text}
+                            </div>
+                        );
+                    })()}
 
-                {/* Favorite Button */}
-                {showActions && !isOwnListing && (
-                    <button
-                        className={`favorite-btn ${isFavorited ? 'favorited' : ''}`}
-                        onClick={handleFavorite}
-                        aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
-                    >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill={isFavorited ? "currentColor" : "none"} stroke="currentColor">
-                            <path d="20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                        </svg>
-                    </button>
-                )}
-            </div>
+                    {/* Request Count Badge (for own listings) */}
+                    {isOwnListing && requestCount > 0 && (
+                        <div className="request-count-badge">
+                            {requestCount} request{requestCount !== 1 ? 's' : ''}
+                        </div>
+                    )}
+
+                    {/* Favorite Button */}
+                    {showActions && !isOwnListing && (
+                        <button
+                            className={`favorite-btn ${isFavorited ? 'favorited' : ''}`}
+                            onClick={handleFavorite}
+                            aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill={isFavorited ? "currentColor" : "none"} stroke="currentColor">
+                                <path d="20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                        </button>
+                    )}
+                </div>
 
             {/* Content Section */}
             <div className="listing-content">
