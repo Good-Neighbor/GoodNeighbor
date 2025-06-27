@@ -387,7 +387,7 @@ function AppContent() {
   };
 
   return (
-    <Router basename="/GoodNeighbor">
+    <Router>
       <Routes>
         <Route path="/" element={<StartPage />} />
         <Route path="/signin" element={<SignIn />} />
