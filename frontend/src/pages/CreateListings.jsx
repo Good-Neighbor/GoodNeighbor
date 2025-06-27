@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./CreateListings.css";
-import { createListingWithPhotos } from '../listingStorage';
 
 const categories = ["Books & Media", "Electronics", "Toys & Games", "Sports & Outdoors", "Home & Garden", "Office & School Supplies", "Vehicles & Parts", "Baby & Kids"];
 
@@ -90,34 +89,36 @@ function CreateListing({ onCreate }){
             return;
         }
         setIsSubmitting(true);
-        setUploadProgress({ current: 0, total: listingType === 'item' ? photos.length : 0 });
+        setUploadProgress({ current: 0, total: photos.length });
+        
         try{
             let listingId = null;
+            
             if (listingType === 'item') {
-                // Create item listing with photos
-                listingId = await createListingWithPhotos(
-                    { ...form, type: 'item' },
-                    photos,
-                    (current, total) => setUploadProgress({ current, total })
-                );
+                // Create item listing with photos - use the onCreate prop
+                const itemListing = {
+                    ...form, 
+                    type: 'item'
+                };
+                
+                if (onCreate) {
+                    listingId = await onCreate(itemListing, photos); // Pass photos as second parameter
+                }
             } else {
                 // Create service listing (no photos)
-                const { title, description, location, serviceType } = form;
-                const newService = {
-                    title,
-                    description,
-                    location,
-                    serviceType,
-                    type: 'service',
-                    createdAt: new Date(),
-                    status: 'available',
-                    requestors: [],
-                    matchedWith: null
+                const serviceData = {
+                    title: form.title,
+                    description: form.description,
+                    location: form.location,
+                    serviceType: form.serviceType,
+                    type: 'service'
                 };
+                
                 if (onCreate) {
-                    await onCreate(newService);
+                    listingId = await onCreate(serviceData); // No photos for services
                 }
             }
+            
             // Reset form
             setForm({
                 title: "",
