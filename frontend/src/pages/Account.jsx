@@ -28,6 +28,11 @@ function Account() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [listingToDelete, setListingToDelete] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editingListing, setEditingListing] = useState(null);
+    const [editFormData, setEditFormData] = useState({});
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [myServices, setMyServices] = useState([]);
 
     // Fetch stats on mount
     useEffect(() => {
@@ -54,6 +59,19 @@ function Account() {
             (snapshot) => {
                 const listings = snapshot.docs.map(doc => ({
                     id: doc.id,
+                    type: 'item',
+                    ...doc.data()
+                }));
+                setMyListings(listings);
+            }
+        );
+
+        const unsubscribeServices = onSnapshot(
+            query(collection(db, 'services'), where('userId', '==', currentUser.uid)),
+            (snapshot) => {
+                const services = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    type: 'service',
                     ...doc.data()
                 }));
                 setMyListings(listings);
@@ -66,6 +84,7 @@ function Account() {
             (snapshot) => {
                 const allListings = snapshot.docs.map(doc => ({
                     id: doc.id,
+                    type: 'item',
                     ...doc.data()
                 }));
                 
@@ -87,6 +106,7 @@ function Account() {
 
         return () => {
             unsubscribeListings();
+            unsubscribeServices();
             unsubscribeRequests();
         };
     }, [currentUser]);
@@ -98,24 +118,26 @@ function Account() {
 
     const confirmDeleteListing = async () => {
         if (!listingToDelete) return;
-        
+    
         setIsDeleting(true);
         try {
-            // Get listing data first
-            const listingDoc = await getDoc(doc(db, 'listings', listingToDelete.id));
-            if (!listingDoc.exists()) {
-                throw new Error('Listing not found');
+            const collection = listingToDelete.type === 'service' ? 'services' : 'listings';
+            const docRef = doc(db, collection, listingToDelete.id);
+            const docSnap = await getDoc(docRef);
+            
+            if (!docSnap.exists()) {
+                throw new Error(`${listingToDelete.type === 'service' ? 'Service' : 'Listing'} not found`);
             }
             
-            const listingData = listingDoc.data();
+            const data = docSnap.data();
             
-            if (listingData.userId !== currentUser.uid) {
-                throw new Error('You can only delete your own listings');
+            if (data.userId !== currentUser.uid) {
+                throw new Error(`You can only delete your own ${listingToDelete.type === 'service' ? 'services' : 'listings'}`);
             }
 
-            // Delete all photos from storage
-            if (listingData.photos && listingData.photos.length > 0) {
-                const deletePromises = listingData.photos.map(photo => {
+            // Delete photos if they exist
+            if (data.photos && data.photos.length > 0) {
+                const deletePromises = data.photos.map(photo => {
                     const photoRef = ref(storage, photo.path);
                     return deleteObject(photoRef);
                 });
@@ -123,15 +145,14 @@ function Account() {
                 await Promise.allSettled(deletePromises);
             }
 
-            // Delete the listing document
-            await deleteDoc(doc(db, 'listings', listingToDelete.id));
+            await deleteDoc(docRef);
             
-            alert('Listing deleted successfully!');
+            alert(`${listingToDelete.type === 'service' ? 'Service' : 'Listing'} deleted successfully!`);
             setShowDeleteModal(false);
             setListingToDelete(null);
         } catch (error) {
-            console.error('Error deleting listing:', error);
-            alert('Failed to delete listing. Please try again.');
+            console.error('Error deleting:', error);
+            alert(`Failed to delete ${listingToDelete.type === 'service' ? 'service' : 'listing'}. Please try again.`);
         } finally {
             setIsDeleting(false);
         }
@@ -140,6 +161,59 @@ function Account() {
     const cancelDeleteListing = () => {
         setShowDeleteModal(false);
         setListingToDelete(null);
+    };
+
+    const handleEditListing = (listing) => {
+        setEditingListing(listing);
+        
+        if (listing.type === 'service') {
+            setEditFormData({
+                title: listing.title || '',
+                description: listing.description || '',
+                serviceType: listing.serviceType || '',
+                location: listing.location || ''
+            });
+        } else {
+            setEditFormData({
+                title: listing.title || '',
+                description: listing.description || '',
+                category: listing.category || '',
+                condition: listing.condition || '',
+                location: listing.location || ''
+            });
+        }
+        setShowEditModal(true);
+    };
+
+    const handleSaveEdit = async () => {
+        if (!editingListing) return;
+        
+        setIsUpdating(true);
+        try {
+            const collection = editingListing.type === 'service' ? 'services' : 'listings';
+            const docRef = doc(db, collection, editingListing.id);
+            
+            await updateDoc(docRef, {
+                ...editFormData,
+                updatedAt: new Date()
+            });
+            
+            alert(`${editingListing.type === 'service' ? 'Service' : 'Listing'} updated successfully!`);
+            setShowEditModal(false);
+            setEditingListing(null);
+            setEditFormData({});
+        } catch (error) {
+            console.error('Error updating:', error);
+            alert(`Failed to update ${editingListing.type === 'service' ? 'service' : 'listing'}. Please try again.`);
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    const cancelEdit = () => {
+        setShowEditModal(false);
+        setEditingListing(null);
+        setEditFormData({});
     };
 
     const handleLogout = async () => {
@@ -334,7 +408,7 @@ function Account() {
                         className={`tab-btn ${activeTab === 'listings' ? 'active' : ''}`}
                         onClick={() => setActiveTab('listings')}
                     >
-                        My Listings ({myListings.length})
+                        My Listings ({myListings.length + myServices.length})
                     </button>
                     <button 
                         className={`tab-btn ${activeTab === 'requests' ? 'active' : ''}`}
@@ -418,7 +492,7 @@ function Account() {
                     {activeTab === 'listings' && (
                         <div className="listings-section">
                             <h2>My Listings</h2>
-                            {myListings.length === 0 ? (
+                            {myListings.length === 0 && myServices.length === 0 ? (
                                 <div className="empty-state">
                                     <p>You haven't created any listings yet.</p>
                                     <button onClick={() => navigate('/createlistings')} className="create-listing-btn">
@@ -427,11 +501,13 @@ function Account() {
                                 </div>
                             ) : (
                                 <div className="listings-grid">
+                                    {/* Render Items */}
                                     {myListings.map(listing => (
-                                        <div key={listing.id} className="listing-card">
+                                        <div key={`item-${listing.id}`} className="listing-card">
                                             <div className="listing-header">
                                                 <h3>{listing.title}</h3>
                                                 <div className="listing-status">
+                                                    <span className="listing-type-badge item">Item</span>
                                                     {listing.status !== 'matched' && (
                                                         <span className={`status-badge ${getStatusClass(listing.status)}`}>
                                                             {listing.status}
@@ -446,6 +522,8 @@ function Account() {
                                             <div className="listing-meta">
                                                 <span>{listing.category}</span>
                                                 <span>•</span>
+                                                <span>{listing.condition}</span>
+                                                <span>•</span>
                                                 <span>{listing.location}</span>
                                             </div>
                                             <div className="listing-actions">
@@ -454,18 +532,77 @@ function Account() {
                                                 </span>
                                                 <div className="listing-buttons">
                                                     {(listing.requestors || []).length > 0 && (
-                                                    <button 
-                                                        className="view-requests-btn"
-                                                        onClick={() => handleViewRequests(listing)}
-                                                    >
-                                                        View Requests
-                                                    </button>
+                                                        <button 
+                                                            className="view-requests-btn"
+                                                            onClick={() => handleViewRequests(listing)}
+                                                        >
+                                                            View Requests
+                                                        </button>
                                                     )}
                                                     <button 
-                                                    className="delete-listing-btn"
-                                                    onClick={() => handleDeleteListing(listing)}
+                                                        className="edit-listing-btn"
+                                                        onClick={() => handleEditListing(listing)}
                                                     >
-                                                    Delete
+                                                        Edit
+                                                    </button>
+                                                    <button 
+                                                        className="delete-listing-btn"
+                                                        onClick={() => handleDeleteListing(listing)}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    
+                                    {/* Render Services */}
+                                    {myServices.map(service => (
+                                        <div key={`service-${service.id}`} className="listing-card">
+                                            <div className="listing-header">
+                                                <h3>{service.title}</h3>
+                                                <div className="listing-status">
+                                                    <span className="listing-type-badge service">Service</span>
+                                                    {service.status !== 'matched' && (
+                                                        <span className={`status-badge ${getStatusClass(service.status)}`}>
+                                                            {service.status}
+                                                        </span>
+                                                    )}
+                                                    {service.matchedWith && (
+                                                        <span className="matched-badge">✓ Matched</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <p className="listing-description">{service.description}</p>
+                                            <div className="listing-meta">
+                                                <span>{service.serviceType}</span>
+                                                <span>•</span>
+                                                <span>{service.location}</span>
+                                            </div>
+                                            <div className="listing-actions">
+                                                <span className="request-count">
+                                                    {(service.requestors || []).length} request{(service.requestors || []).length !== 1 ? 's' : ''}
+                                                </span>
+                                                <div className="listing-buttons">
+                                                    {(service.requestors || []).length > 0 && (
+                                                        <button 
+                                                            className="view-requests-btn"
+                                                            onClick={() => handleViewRequests(service)}
+                                                        >
+                                                            View Requests
+                                                        </button>
+                                                    )}
+                                                    <button 
+                                                        className="edit-listing-btn"
+                                                        onClick={() => handleEditListing(service)}
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button 
+                                                        className="delete-listing-btn"
+                                                        onClick={() => handleDeleteListing(service)}
+                                                    >
+                                                        Delete
                                                     </button>
                                                 </div>
                                             </div>
@@ -709,6 +846,149 @@ function Account() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Edit Listing Modal */}
+            {showEditModal && editingListing && (
+                <div className="modal-overlay" onClick={cancelEdit}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>Edit {editingListing.type === 'service' ? 'Service' : 'Listing'}</h3>
+                            <button className="close-modal-btn" onClick={cancelEdit}>×</button>
+                        </div>
+                        <div className="modal-body">
+                            <form className="edit-form">
+                                <div className="form-group">
+                                    <label htmlFor="edit-title">Title</label>
+                                    <input
+                                        type="text"
+                                        id="edit-title"
+                                        name="title"
+                                        value={editFormData.title}
+                                        onChange={handleEditFormChange}
+                                        className="form-input"
+                                        required
+                                    />
+                                </div>
+                                
+                                <div className="form-group">
+                                    <label htmlFor="edit-description">Description</label>
+                                    <textarea
+                                        id="edit-description"
+                                        name="description"
+                                        value={editFormData.description}
+                                        onChange={handleEditFormChange}
+                                        className="form-textarea"
+                                        rows="4"
+                                        required
+                                    />
+                                </div>
+                                
+                                {/* Service Type (for services) */}
+                                {editingListing.type === 'service' && (
+                                    <div className="form-group">
+                                        <label htmlFor="edit-serviceType">Service Type</label>
+                                        <select
+                                            id="edit-serviceType"
+                                            name="serviceType"
+                                            value={editFormData.serviceType}
+                                            onChange={handleEditFormChange}
+                                            className="form-select"
+                                            required
+                                        >
+                                            <option value="">Select Service Type</option>
+                                            <option value="Tutoring">Tutoring</option>
+                                            <option value="Volunteer Opportunity">Volunteer Opportunity</option>
+                                            <option value="Yardwork">Yardwork</option>
+                                            <option value="Pet Care">Pet Care</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                )}
+                                
+                                {/* Category and Condition (for items) */}
+                                {editingListing.type === 'item' && (
+                                    <>
+                                        <div className="form-group">
+                                            <label htmlFor="edit-category">Category</label>
+                                            <select
+                                                id="edit-category"
+                                                name="category"
+                                                value={editFormData.category}
+                                                onChange={handleEditFormChange}
+                                                className="form-select"
+                                                required
+                                            >
+                                                <option value="">Select Category</option>
+                                                <option value="Books & Media">Books & Media</option>
+                                                <option value="Electronics">Electronics</option>
+                                                <option value="Toys & Games">Toys & Games</option>
+                                                <option value="Sports & Outdoors">Sports & Outdoors</option>
+                                                <option value="Home & Garden">Home & Garden</option>
+                                                <option value="Office & School Supplies">Office & School Supplies</option>
+                                                <option value="Vehicles & Parts">Vehicles & Parts</option>
+                                                <option value="Baby & Kids">Baby & Kids</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div className="form-group">
+                                            <label htmlFor="edit-condition">Condition</label>
+                                            <select
+                                                id="edit-condition"
+                                                name="condition"
+                                                value={editFormData.condition}
+                                                onChange={handleEditFormChange}
+                                                className="form-select"
+                                                required
+                                            >
+                                                <option value="">Select Condition</option>
+                                                <option value="Like New">Like New</option>
+                                                <option value="Good">Good</option>
+                                                <option value="Fair">Fair</option>
+                                                <option value="Poor">Poor</option>
+                                            </select>
+                                        </div>
+                                    </>
+                                )}
+                            <div className="form-group">
+                                <label htmlFor="edit-location">Location</label>
+                                <input
+                                type="text"
+                                id="edit-location"
+                                name="location"
+                                value={editFormData.location}
+                                onChange={handleEditFormChange}
+                                className="form-input"
+                                required
+                                />
+                            </div>
+                            </form>
+                    </div>
+                    <div className="modal-footer">
+                        <button 
+                        className="cancel-btn" 
+                        onClick={cancelEdit}
+                        disabled={isUpdating}
+                        >
+                        Cancel
+                        </button>
+                        <button 
+                        className={`save-btn ${isUpdating ? 'loading' : ''}`}
+                        onClick={handleSaveEdit}
+                        disabled={isUpdating}
+                        >
+                        {isUpdating ? (
+                            <>
+                            <div className="spinner"></div>
+                            Saving...
+                            </>
+                        ) : (
+                            'Save Changes'
+                        )}
+                        </button>
+                    </div>
+                </div>
+            </div>
             )}
         </div>
     );
