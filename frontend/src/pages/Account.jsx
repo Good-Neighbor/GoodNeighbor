@@ -369,6 +369,15 @@ function Account() {
         }
     };
 
+    // Handler for edit form changes
+    const handleEditFormChange = (e) => {
+        const { name, value } = e.target;
+        setEditFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
     if (loading) {
         return (
             <div className="account-page">
@@ -965,13 +974,6 @@ function Account() {
                             </form>
                     </div>
                     <div className="modal-footer">
-                        <button 
-                        className="cancel-btn" 
-                        onClick={cancelEdit}
-                        disabled={isUpdating}
-                        >
-                        Cancel
-                        </button>
                         <button 
                         className={`save-btn ${isUpdating ? 'loading' : ''}`}
                         onClick={handleSaveEdit}
