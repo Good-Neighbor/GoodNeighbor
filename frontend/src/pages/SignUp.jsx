@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
 import { auth, db, incrementStat } from '../firebaseConfig';
-import { doc, setDoc, getDocs, collection, query, where } from 'firebase/firestore';
+import { doc, setDoc, getDocs, collection, query, where, getDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import './SignUp.css';
 
@@ -25,10 +25,16 @@ function SignUp() {
 
   // Check if username is unique (case-insensitive)
   const isUsernameUnique = async (username) => {
-    const usersRef = collection(db, 'users');
-    const q = query(usersRef, where('username', '==', username));
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.empty;
+    try {
+      // Check if username exists in the usernames collection
+      const usernameDoc = doc(db, 'usernames', username.toLowerCase());
+      const usernameSnap = await getDoc(usernameDoc);
+      return !usernameSnap.exists();
+    } catch (error) {
+      console.error('Error checking username uniqueness:', error);
+      // If there's an error, assume username is not unique to be safe
+      return false;
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -36,27 +42,61 @@ function SignUp() {
     setError('');
     setIsLoading(true);
 
+    // Basic validation
+    if (!formData.username.trim()) {
+      setError('Username is required');
+      setIsLoading(false);
+      return;
+    }
+
+    if (!formData.fullName.trim()) {
+      setError('Full name is required');
+      setIsLoading(false);
+      return;
+    }
+
+    if (!formData.email.trim()) {
+      setError('Email is required');
+      setIsLoading(false);
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      setIsLoading(false);
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
       setIsLoading(false);
       return;
     }
 
-    // Username uniqueness check
-    const username = formData.username.trim();
-    if (!username) {
-      setError('Username is required');
+    // Username validation
+    const username = formData.username.trim().toLowerCase();
+    if (username.length < 3) {
+      setError('Username must be at least 3 characters long');
       setIsLoading(false);
       return;
     }
-    const unique = await isUsernameUnique(username.toLowerCase());
-    if (!unique) {
-      setError('Username is already taken. Please choose another.');
+
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      setError('Username can only contain letters, numbers, and underscores');
       setIsLoading(false);
       return;
     }
 
     try {
+      // Check username uniqueness first (fast check)
+      const unique = await isUsernameUnique(username);
+      if (!unique) {
+        setError('Username is already taken. Please choose another.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Create user account
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
 
@@ -74,14 +114,32 @@ function SignUp() {
         createdAt: new Date()
       });
 
-      // Increment account stat
-      await incrementStat('accounts');
+      // Reserve the username
+      await setDoc(doc(db, "usernames", username), {
+        userId: user.uid,
+        createdAt: new Date()
+      });
 
       setIsLoading(false);
-      alert('Account created! Please check your email and verify your account before signing in.');
+      alert('Account created successfully! Please check your email and verify your account before signing in.');
       navigate('/account');
     } catch (err) {
-      setError(err.message);
+      console.error('Signup error:', err);
+      
+      // Provide user-friendly error messages
+      let errorMessage = 'An error occurred during signup. Please try again.';
+      
+      if (err.code === 'auth/email-already-in-use') {
+        errorMessage = 'An account with this email already exists. Please sign in instead.';
+      } else if (err.code === 'auth/invalid-email') {
+        errorMessage = 'Please enter a valid email address.';
+      } else if (err.code === 'auth/weak-password') {
+        errorMessage = 'Password is too weak. Please choose a stronger password.';
+      } else if (err.code === 'auth/network-request-failed') {
+        errorMessage = 'Network error. Please check your internet connection and try again.';
+      }
+      
+      setError(errorMessage);
       setIsLoading(false);
     }
   };

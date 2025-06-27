@@ -349,19 +349,28 @@ function Account() {
                     {/* Profile Tab */}
                     {activeTab === 'profile' && (
                         <div className="profile-section">
+                            <h3>Profile Information</h3>
                             <div className="profile-info">
-                                <h2>Profile Information</h2>
-                                <div className="info-item">
-                                    <label>Email:</label>
-                                    <span>{userProfile?.email || currentUser?.email}</span>
+                                <div className="info-row">
+                                    <span className="info-label">Email:</span>
+                                    <span className="info-value">{currentUser.email}</span>
+                                    <span className={`verification-badge ${currentUser.emailVerified ? 'verified' : 'unverified'}`}>
+                                        {currentUser.emailVerified ? '✓ Verified' : '⚠ Unverified'}
+                                    </span>
                                 </div>
-                                <div className="info-item">
-                                    <label>Name:</label>
-                                    <span>{userProfile?.fullName || 'Not set'}</span>
+                                <div className="info-row">
+                                    <span className="info-label">Full Name:</span>
+                                    <span className="info-value">{userProfile?.fullName || 'Not set'}</span>
                                 </div>
-                                <div className="info-item">
-                                    <label>Member since:</label>
-                                    <span>{userProfile?.createdAt ? formatDate(userProfile.createdAt) : 'Unknown'}</span>
+                                <div className="info-row">
+                                    <span className="info-label">Username:</span>
+                                    <span className="info-value">{userProfile?.username || 'Not set'}</span>
+                                </div>
+                                <div className="info-row">
+                                    <span className="info-label">Member Since:</span>
+                                    <span className="info-value">
+                                        {userProfile?.createdAt ? new Date(userProfile.createdAt.toDate()).toLocaleDateString() : 'Unknown'}
+                                    </span>
                                 </div>
                             </div>
                             

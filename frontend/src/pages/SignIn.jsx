@@ -120,17 +120,20 @@ function SignIn() {
           )}
 
           {showResend && (
-            <div style={{ marginBottom: '1rem', textAlign: 'center' }}>
+            <div className="resend-verification-container">
               <button
                 type="button"
-                className="signin-button"
-                style={{ background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)', marginBottom: '0.5rem' }}
+                className="resend-button"
                 onClick={handleResendVerification}
                 disabled={isLoading}
               >
                 {isLoading ? 'Sending...' : 'Resend Verification Email'}
               </button>
-              {resendMessage && <div style={{ color: '#667eea', fontWeight: 500 }}>{resendMessage}</div>}
+              {resendMessage && (
+                <div className={`resend-message ${resendMessage.includes('Failed') ? 'error' : ''}`}>
+                  {resendMessage}
+                </div>
+              )}
             </div>
           )}
 
@@ -151,6 +154,15 @@ function SignIn() {
               onClick={() => navigate('/signup')}
             >
               Sign up
+            </button>
+          </p>
+          <p className="verification-prompt">
+            Need to verify your email?{' '}
+            <button 
+              className="verification-link"
+              onClick={() => setShowResend(true)}
+            >
+              Resend verification email
             </button>
           </p>
         </div>
