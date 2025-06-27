@@ -185,6 +185,14 @@ function Account() {
         setShowEditModal(true);
     };
 
+    const handleEditFormChange = (e) => {
+        const { name, value } = e.target;
+        setEditFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
     const handleSaveEdit = async () => {
         if (!editingListing) return;
         
