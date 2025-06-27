@@ -12,9 +12,6 @@ import Account from './pages/Account';
 import About from './pages/About';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
-{/*import ServicesPage from './pages/ServicesPage';
-import CreateService from './pages/CreateService';*/}
-
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -52,25 +49,8 @@ function AppContent() {
       setLoading(false);
     });
 
-    {/*const unsubscribeServices = onSnapshot(collection(db, 'services'), (snapshot) => {
-      const servicesData = snapshot.docs.map(doc => {
-        const data = doc.data();
-        const { id: customId, ...serviceData } = data;
-        return {
-          id: doc.id,
-          ...serviceData
-        };
-      });
-      setServices(servicesData);
-      setServicesLoading(false);
-    }, (error) => {
-      console.error('Error fetching services:', error);
-      setServicesLoading(false);
-    });*/}
-
     return () => {
       unsubscribeListings();
-      //unsubscribeServices();
     };
   }, []);
 
@@ -113,45 +93,6 @@ function AppContent() {
       throw error;
     }
   };  
-
-  {/*const handleCreateService = async (newService, photoFiles = []) => {
-    try {
-      const serviceWithMetadata = {
-        ...newService,
-        userId: currentUser.uid,
-        userEmail: userProfile?.email || currentUser.email,
-        userFullName: userProfile?.fullName || currentUser.displayName || 'User',
-        createdAt: new Date(),
-        requestors: [],
-        matchedWith: null,
-        status: 'available',
-        reviews: [],
-        rating: 0,
-        photos: [],
-        views: 0
-      };
-
-      const docRef = await addDoc(collection(db, 'services'), serviceWithMetadata);
-      const serviceId = docRef.id;
-      
-      // Upload photos if provided
-      if (photoFiles && photoFiles.length > 0) {
-        const uploadedPhotos = await uploadPhotos(serviceId, photoFiles);
-        
-        // Update the service document with photo URLs
-        await updateDoc(docRef, {
-          photos: uploadedPhotos,
-          updatedAt: new Date()
-        });
-      }
-
-      console.log('Service created with ID:', serviceId);
-      return serviceId;
-    } catch (error) {
-      console.error('Error creating service:', error);
-      throw error;
-    }
-  };*/}
 
   // Handle listing contact (add requestor)
   const handleContact = async (listing) => {
@@ -208,61 +149,6 @@ function AppContent() {
     }
   };
 
-  const handleServiceContact = async (service) => {
-    if (!currentUser) {
-      alert('Please sign in to contact the service provider');
-      return;
-    }
-
-    if (!service) {
-      console.error('Invalid service object:', service);
-      alert('Invalid service. Please try again.');
-      return;
-    }
-
-    try {
-      console.log('Service object:', service);
-      console.log('Current user:', currentUser.uid);
-      
-      // Check if user already requested this service
-      const requestors = Array.isArray(service.requestors) ? service.requestors : [];
-      console.log('Requestors array:', requestors);
-      
-      const alreadyRequested = requestors.some(req => req.userId === currentUser.uid);
-      if (alreadyRequested) {
-        alert('You have already requested this service');
-        return;
-      }
-
-      // Use the Firestore document ID
-      const serviceRef = doc(db, 'services', service.id);
-      const newRequestor = {
-        userId: currentUser.uid,
-        userEmail: userProfile?.email || currentUser.email,
-        userFullName: userProfile?.fullName || currentUser.displayName || 'User',
-        requestDate: new Date().toISOString()
-      };
-
-      console.log('New requestor:', newRequestor);
-      console.log('Updated requestors array:', [...requestors, newRequestor]);
-
-      await updateDoc(serviceRef, {
-        requestors: [...requestors, newRequestor]
-      });
-
-      alert('Service request sent successfully!');
-    } catch (error) {
-      console.error('Error sending service request:', error);
-      console.error('Error details:', {
-        service: service,
-        currentUser: currentUser?.uid,
-        userProfile: userProfile
-      });
-      alert('Failed to send service request. Please try again.');
-    }
-  };
-
-
   // Handle listing favorite
   const handleFavorite = (listingId) => {
     // You can implement favorite functionality here
@@ -301,45 +187,6 @@ function AppContent() {
     } catch (error) {
       console.error('Error claiming listing:', error);
       alert('Failed to mark as claimed. Please try again.');
-    }
-  };
-
-  // Handle service favorite
-  const handleServiceFavorite = (serviceId) => {
-    console.log('Favoriting service:', serviceId);
-  };
-
-  // Handle service share
-  const handleServiceShare = (service) => {
-    console.log('Sharing service:', service.title);
-  };
-
-  // Handle service matching with requestor
-  const handleServiceMatch = async (serviceId, requestor) => {
-    try {
-      const serviceRef = doc(db, 'services', serviceId);
-      await updateDoc(serviceRef, {
-        matchedWith: requestor,
-        status: 'matched'
-      });
-      alert('Successfully matched with service requestor!');
-    } catch (error) {
-      console.error('Error matching with service requestor:', error);
-      alert('Failed to match with service requestor. Please try again.');
-    }
-  };
-
-  // Handle marking service as completed
-  const handleServiceComplete = async (serviceId) => {
-    try {
-      const serviceRef = doc(db, 'services', serviceId);
-      await updateDoc(serviceRef, {
-        status: 'completed'
-      });
-      alert('Service marked as completed!');
-    } catch (error) {
-      console.error('Error completing service:', error);
-      alert('Failed to mark service as completed. Please try again.');
     }
   };
 
@@ -415,29 +262,6 @@ function AppContent() {
             </ProtectedRoute>
           } 
         />
-        {/*<Route 
-          path="/servicespage" 
-          element={
-          <ServicesPage 
-            services={services}
-            loading={servicesLoading}
-            onContact={handleServiceContact}
-            onFavorite={handleServiceFavorite}
-            onShare={handleServiceShare}
-            onMatch={handleServiceMatch}
-            onComplete={handleServiceComplete}
-            currentUserId={currentUser?.uid}
-          />
-          } 
-        />
-        <Route 
-          path="/createservice" 
-          element={
-            <ProtectedRoute>
-              <CreateService onCreate={handleCreateService} />
-            </ProtectedRoute>
-          } 
-        />*/}
         <Route 
           path="/account" 
           element={

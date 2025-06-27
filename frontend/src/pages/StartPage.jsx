@@ -34,13 +34,6 @@ function StartPage() {
             >
               Browse Listings
             </button>
-
-            {/*<button 
-              className="start-button secondary"
-              onClick={() => navigate("/servicespage")}
-            >
-              Browse Services
-            </button>*/}
             
             <button 
               className="start-button secondary"
@@ -48,13 +41,6 @@ function StartPage() {
             >
               Create Listing
             </button>
-
-            {/*<button 
-              className="start-button secondary"
-              onClick={() => navigate("/createservices")}
-            >
-              Create Service
-            </button>*/}
 
             {currentUser && (
               <button 
