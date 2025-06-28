@@ -909,9 +909,8 @@ function Account() {
                                         >
                                             <option value="">Select Service Type</option>
                                             <option value="Tutoring">Tutoring</option>
-                                            <option value="Volunteer Opportunity">Volunteer Opportunity</option>
-                                            <option value="Yardwork">Yardwork</option>
-                                            <option value="Pet Care">Pet Care</option>
+                                            <option value="Volunteering">Volunteering</option>
+                                            <option value="Carpooling">Carpooling</option>
                                             <option value="Other">Other</option>
                                         </select>
                                     </div>

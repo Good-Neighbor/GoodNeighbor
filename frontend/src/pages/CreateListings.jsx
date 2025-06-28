@@ -23,9 +23,8 @@ function CreateListing({ onCreate }){
     const [listingType, setListingType] = useState('item'); // 'item' or 'service'
     const serviceTypes = [
         'Tutoring',
-        'Volunteer Opportunity',
-        'Yardwork',
-        'Pet Care',
+        'Volunteering',
+        'Carpooling',
         'Other'
     ];
 
