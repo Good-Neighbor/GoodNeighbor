@@ -120,6 +120,9 @@ function SignUp() {
         createdAt: new Date()
       });
 
+      // Increment the accounts stat
+      await incrementStat('accounts');
+
       setIsLoading(false);
       alert('Account created successfully! Please check your email and verify your account before signing in.');
       navigate('/account');

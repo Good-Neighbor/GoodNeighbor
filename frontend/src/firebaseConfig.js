@@ -52,9 +52,10 @@ export async function updateStatsFromExistingData() {
     const usersSnapshot = await getDocs(collection(db, 'users'));
     const userCount = usersSnapshot.size;
     
-    // Count listings
+    // Count listings and services
     const listingsSnapshot = await getDocs(collection(db, 'listings'));
-    const listingCount = listingsSnapshot.size;
+    const servicesSnapshot = await getDocs(collection(db, 'services'));
+    const listingCount = listingsSnapshot.size + servicesSnapshot.size;
     
     // Update stats document
     await runTransaction(db, async (transaction) => {
@@ -64,7 +65,7 @@ export async function updateStatsFromExistingData() {
       });
     });
     
-    console.log(`Updated stats: ${userCount} accounts, ${listingCount} listings`);
+    console.log(`Updated stats: ${userCount} accounts, ${listingCount} listings (${listingsSnapshot.size} items + ${servicesSnapshot.size} services)`);
     return { accounts: userCount, listings: listingCount };
   } catch (error) {
     console.error('Error updating stats:', error);
@@ -81,5 +82,16 @@ export async function initializeStatsIfNeeded() {
     }
   } catch (error) {
     console.error('Error initializing stats:', error);
+  }
+}
+
+// Function to manually sync stats (useful for debugging or fixing stats)
+export async function syncStats() {
+  try {
+    console.log('Manually syncing stats...');
+    await updateStatsFromExistingData();
+    console.log('Stats sync completed');
+  } catch (error) {
+    console.error('Error syncing stats:', error);
   }
 }
