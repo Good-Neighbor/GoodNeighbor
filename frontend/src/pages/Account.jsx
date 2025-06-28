@@ -34,20 +34,23 @@ function Account() {
     const [isUpdating, setIsUpdating] = useState(false);
     const [myServices, setMyServices] = useState([]);
 
-    // Fetch stats on mount
+    // Fetch stats on mount with real-time updates
     useEffect(() => {
-        async function fetchStats() {
-            setStatsLoading(true);
-            try {
-                const data = await getStats();
-                setStats(data);
-            } catch (e) {
+        const statsDocRef = doc(db, 'meta', 'stats');
+        const unsubscribe = onSnapshot(statsDocRef, (doc) => {
+            if (doc.exists()) {
+                setStats(doc.data());
+            } else {
                 setStats({ accounts: 0, listings: 0 });
-            } finally {
-                setStatsLoading(false);
             }
-        }
-        fetchStats();
+            setStatsLoading(false);
+        }, (error) => {
+            console.error('Error fetching stats:', error);
+            setStats({ accounts: 0, listings: 0 });
+            setStatsLoading(false);
+        });
+
+        return () => unsubscribe();
     }, []);
 
     // Fetch user's listings

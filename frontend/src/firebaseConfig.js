@@ -71,3 +71,15 @@ export async function updateStatsFromExistingData() {
     throw error;
   }
 }
+
+export async function initializeStatsIfNeeded() {
+  try {
+    const statsSnap = await getDoc(statsDocRef);
+    if (!statsSnap.exists()) {
+      console.log('Stats document does not exist, initializing from existing data...');
+      await updateStatsFromExistingData();
+    }
+  } catch (error) {
+    console.error('Error initializing stats:', error);
+  }
+}

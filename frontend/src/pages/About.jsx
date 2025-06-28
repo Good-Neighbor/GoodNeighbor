@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getStats } from '../firebaseConfig';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
 import './About.css';
 
 function About() {
@@ -9,18 +11,22 @@ function About() {
   const [statsLoading, setStatsLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchStats() {
-      setStatsLoading(true);
-      try {
-        const data = await getStats();
-        setStats(data);
-      } catch (e) {
+    // Set up real-time listener for stats
+    const statsDocRef = doc(db, 'meta', 'stats');
+    const unsubscribe = onSnapshot(statsDocRef, (doc) => {
+      if (doc.exists()) {
+        setStats(doc.data());
+      } else {
         setStats({ accounts: 0, listings: 0 });
-      } finally {
-        setStatsLoading(false);
       }
-    }
-    fetchStats();
+      setStatsLoading(false);
+    }, (error) => {
+      console.error('Error fetching stats:', error);
+      setStats({ accounts: 0, listings: 0 });
+      setStatsLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const handleBackToStart = () => {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { collection, addDoc, getDocs, onSnapshot, updateDoc, doc } from 'firebase/firestore';
-import { db, incrementStat, storage } from './firebaseConfig';
+import { db, incrementStat, storage, initializeStatsIfNeeded } from './firebaseConfig';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import StartPage from './pages/StartPage';
 import SignIn from './pages/SignIn';
@@ -31,6 +31,11 @@ function AppContent() {
   const [servicesLoading, setServicesLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const { currentUser, userProfile, getUserProfile } = useAuth();
+
+  // Initialize stats when app starts
+  useEffect(() => {
+    initializeStatsIfNeeded();
+  }, []);
 
   // Fetch listings from Firestore
   useEffect(() => {
@@ -125,6 +130,9 @@ function AppContent() {
 
       const docRef = await addDoc(collection(db, 'listings'), listingWithMetadata);
       const listingId = docRef.id;
+      
+      // Increment the listings stat
+      await incrementStat('listings');
       
       // Upload and compress photos if provided
       if (photoFiles && photoFiles.length > 0) {
