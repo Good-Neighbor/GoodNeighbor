@@ -65,19 +65,24 @@ function Account() {
                     type: 'item',
                     ...doc.data()
                 }));
-                setMyListings(listings);
-            }
-        );
-
-        const unsubscribeServices = onSnapshot(
-            query(collection(db, 'services'), where('userId', '==', currentUser.uid)),
-            (snapshot) => {
-                const services = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    type: 'service',
-                    ...doc.data()
-                }));
-                setMyListings(listings);
+                
+                // Get services and combine with listings
+                const unsubscribeServices = onSnapshot(
+                    query(collection(db, 'services'), where('userId', '==', currentUser.uid)),
+                    (servicesSnapshot) => {
+                        const services = servicesSnapshot.docs.map(doc => ({
+                            id: doc.id,
+                            type: 'service',
+                            ...doc.data()
+                        }));
+                        
+                        // Combine listings and services
+                        const allListings = [...listings, ...services];
+                        setMyListings(allListings);
+                    }
+                );
+                
+                return () => unsubscribeServices();
             }
         );
 
@@ -109,7 +114,6 @@ function Account() {
 
         return () => {
             unsubscribeListings();
-            unsubscribeServices();
             unsubscribeRequests();
         };
     }, [currentUser]);

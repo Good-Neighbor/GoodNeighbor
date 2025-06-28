@@ -5,6 +5,8 @@ import "./ListingsPage.css";
 
 const categories = ["All", "Textbooks/School", "Clothing", "Sports", "Other"];
 
+const serviceTypes = ["All", "Tutoring", "Volunteering", "Carpooling", "Other"];
+
 const sortOptions = [
     { value: "newest", label: "Newest First" },
     { value: "oldest", label: "Oldest First" },
@@ -14,6 +16,7 @@ const sortOptions = [
 
 function ListingsPage({ listings = [], onContact, onFavorite, onMatch, onClaim, favorites = [], currentUserId, loading = false }) {
     const [selectedCategory, setSelectedCategory] = useState("All");
+    const [selectedServiceType, setSelectedServiceType] = useState("All");
     const [searchQuery, setSearchQuery] = useState("");
     const [sortBy, setSortBy] = useState("newest");
     const [viewMode, setViewMode] = useState("grid"); // grid or list
@@ -25,9 +28,18 @@ function ListingsPage({ listings = [], onContact, onFavorite, onMatch, onClaim, 
     const filteredAndSortedListings = useMemo(() => {
         let filtered = listings;
 
-        // Apply category filter
+        // Apply category filter for items only
         if (selectedCategory !== "All") {
-            filtered = filtered.filter(listing => listing.category === selectedCategory);
+            filtered = filtered.filter(listing => 
+                listing.type === 'item' && listing.category === selectedCategory
+            );
+        }
+
+        // Apply service type filter for services only
+        if (selectedServiceType !== "All") {
+            filtered = filtered.filter(listing => 
+                listing.type === 'service' && listing.serviceType === selectedServiceType
+            );
         }
 
         // Apply search filter
@@ -37,7 +49,8 @@ function ListingsPage({ listings = [], onContact, onFavorite, onMatch, onClaim, 
                 listing.title.toLowerCase().includes(query) ||
                 listing.description.toLowerCase().includes(query) ||
                 listing.location.toLowerCase().includes(query) ||
-                listing.category.toLowerCase().includes(query)
+                (listing.category && listing.category.toLowerCase().includes(query)) ||
+                (listing.serviceType && listing.serviceType.toLowerCase().includes(query))
             );
         }
 
@@ -51,14 +64,16 @@ function ListingsPage({ listings = [], onContact, onFavorite, onMatch, onClaim, 
                 case "title":
                     return a.title.localeCompare(b.title);
                 case "category":
-                    return a.category.localeCompare(b.category);
+                    const aCategory = a.category || a.serviceType || '';
+                    const bCategory = b.category || b.serviceType || '';
+                    return aCategory.localeCompare(bCategory);
                 default:
                     return 0;
             }
         });
 
         return filtered;
-    }, [listings, selectedCategory, searchQuery, sortBy]);
+    }, [listings, selectedCategory, selectedServiceType, searchQuery, sortBy]);
 
     // Calculate pagination
     const totalPages = Math.ceil(filteredAndSortedListings.length / itemsPerPage);
@@ -69,7 +84,7 @@ function ListingsPage({ listings = [], onContact, onFavorite, onMatch, onClaim, 
     // Reset to first page when filters change
     useEffect(() => {
         setCurrentPage(1);
-    }, [selectedCategory, searchQuery, sortBy]);
+    }, [selectedCategory, selectedServiceType, searchQuery, sortBy]);
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
@@ -78,6 +93,10 @@ function ListingsPage({ listings = [], onContact, onFavorite, onMatch, onClaim, 
 
     const handleCategoryChange = (category) => {
         setSelectedCategory(category);
+    };
+
+    const handleServiceTypeChange = (serviceType) => {
+        setSelectedServiceType(serviceType);
     };
 
     const handleSearchChange = (e) => {
@@ -94,6 +113,7 @@ function ListingsPage({ listings = [], onContact, onFavorite, onMatch, onClaim, 
 
     const clearFilters = () => {
         setSelectedCategory("All");
+        setSelectedServiceType("All");
         setSearchQuery("");
         setSortBy("newest");
     };
@@ -146,7 +166,7 @@ function ListingsPage({ listings = [], onContact, onFavorite, onMatch, onClaim, 
                 </button>
                 <div className="header-content">
                     <h1>Marketplace</h1>
-                    <p>Find free items in your community</p>
+                    <p>Find free items and services in your community</p>
                 </div>
             </div>
 
@@ -162,7 +182,7 @@ function ListingsPage({ listings = [], onContact, onFavorite, onMatch, onClaim, 
                             </svg>
                             <input
                                 type="text"
-                                placeholder="Search for items..."
+                                placeholder="Search for items and services..."
                                 value={searchQuery}
                                 onChange={handleSearchChange}
                                 className="search-input"
@@ -239,6 +259,22 @@ function ListingsPage({ listings = [], onContact, onFavorite, onMatch, onClaim, 
                         </div>
                     </div>
 
+                    {/* Service Types */}
+                    <div className="filter-section">
+                        <h3>Service Types</h3>
+                        <div className="service-type-filters">
+                            {serviceTypes.map(serviceType => (
+                                <button
+                                    key={serviceType}
+                                    className={`service-type-btn ${selectedServiceType === serviceType ? "active" : ""}`}
+                                    onClick={() => handleServiceTypeChange(serviceType)}
+                                >
+                                    {serviceType}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                     {/* Sort Options */}
                     <div className="filter-section">
                         <h3>Sort By</h3>
@@ -275,12 +311,18 @@ function ListingsPage({ listings = [], onContact, onFavorite, onMatch, onClaim, 
                       </span>
                     </>
                   )}
-                  {(selectedCategory !== "All" || searchQuery) && (
+                  {(selectedCategory !== "All" || selectedServiceType !== "All" || searchQuery) && (
                       <div className="active-filters">
                           {selectedCategory !== "All" && (
                               <span className="filter-tag">
                                   {selectedCategory}
                                   <button onClick={() => setSelectedCategory("All")}>×</button>
+                              </span>
+                          )}
+                          {selectedServiceType !== "All" && (
+                              <span className="filter-tag">
+                                  {selectedServiceType}
+                                  <button onClick={() => setSelectedServiceType("All")}>×</button>
                               </span>
                           )}
                           {searchQuery && (
@@ -328,12 +370,12 @@ function ListingsPage({ listings = [], onContact, onFavorite, onMatch, onClaim, 
                         </div>
                         <h2 className="no-results-title">No items found</h2>
                         <p className="no-results-message">
-                          {searchQuery || selectedCategory !== "All" 
+                          {searchQuery || selectedCategory !== "All" || selectedServiceType !== "All"
                             ? "Try adjusting your search or filters."
                             : "There are no listings available at the moment. Be the first to share something with your community!"}
                         </p>
                         <div className="no-results-actions">
-                          {(searchQuery || selectedCategory !== "All") && (
+                          {(searchQuery || selectedCategory !== "All" || selectedServiceType !== "All") && (
                             <button className="clear-filters-btn" onClick={clearFilters}>
                               Clear Filters
                             </button>

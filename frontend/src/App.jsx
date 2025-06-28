@@ -37,7 +37,7 @@ function AppContent() {
     initializeStatsIfNeeded();
   }, []);
 
-  // Fetch listings from Firestore
+  // Fetch listings and services from Firestore
   useEffect(() => {
     const unsubscribeListings = onSnapshot(collection(db, 'listings'), (snapshot) => {
       const listingsData = snapshot.docs.map(doc => {
@@ -45,11 +45,35 @@ function AppContent() {
         const { id: customId, ...listingData } = data;
         return {
           id: doc.id,
+          type: 'item',
           ...listingData
         };
       });
-      setListings(listingsData);
-      setLoading(false);
+
+      const unsubscribeServices = onSnapshot(collection(db, 'services'), (servicesSnapshot) => {
+        const servicesData = servicesSnapshot.docs.map(doc => {
+          const data = doc.data();
+          const { id: customId, ...serviceData } = data;
+          return {
+            id: doc.id,
+            type: 'service',
+            ...serviceData
+          };
+        });
+
+        // Combine listings and services
+        const allListings = [...listingsData, ...servicesData];
+        setListings(allListings);
+        setLoading(false);
+      }, (error) => {
+        console.error('Error fetching services:', error);
+        setListings(listingsData);
+        setLoading(false);
+      });
+
+      return () => {
+        unsubscribeServices();
+      };
     }, (error) => {
       console.error('Error fetching listings:', error);
       setLoading(false);
@@ -113,6 +137,9 @@ function AppContent() {
   // Create new listing
   const handleCreateListing = async (newListing, photoFiles = []) => {
     try {
+      // Determine which collection to use based on listing type
+      const collectionName = newListing.type === 'service' ? 'services' : 'listings';
+      
       // First, create the listing document without photos
       const listingWithMetadata = {
         ...newListing,
@@ -128,14 +155,14 @@ function AppContent() {
         favorites: []
       };
 
-      const docRef = await addDoc(collection(db, 'listings'), listingWithMetadata);
+      const docRef = await addDoc(collection(db, collectionName), listingWithMetadata);
       const listingId = docRef.id;
       
       // Increment the listings stat
       await incrementStat('listings');
       
-      // Upload and compress photos if provided
-      if (photoFiles && photoFiles.length > 0) {
+      // Upload and compress photos if provided (only for items)
+      if (newListing.type === 'item' && photoFiles && photoFiles.length > 0) {
         console.log('Compressing and uploading', photoFiles.length, 'photos...');
         const uploadedPhotos = await uploadPhotos(listingId, photoFiles);
         

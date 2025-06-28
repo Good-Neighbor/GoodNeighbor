@@ -113,9 +113,9 @@ html, body, #root {
   color: #6b7280;
 }
 
-/* Filter toggle button - hidden on desktop, shown on mobile */
+/* Filter toggle button - shown on all devices */
 .filter-toggle {
-  display: none !important;
+  display: flex !important;
   align-items: center;
   gap: 0.5rem;
   padding: 0.875rem 1rem !important;
@@ -161,19 +161,37 @@ html, body, #root {
 .filters-panel {
   display: none;
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 1.5rem 2rem;
+  backdrop-filter: blur(15px);
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .filters-panel.show {
   display: block;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .filter-section {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .filter-section:last-child {
@@ -181,10 +199,13 @@ html, body, #root {
 }
 
 .filter-section h3 {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
   color: #1a202c;
-  margin: 0 0 0.75rem 0;
+  margin: 0 0 1rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.85rem;
 }
 
 /* Reset all button styling first */
@@ -269,81 +290,63 @@ button:focus {
   color: inherit !important;
 }
 
-/* Category filter buttons styling */
+/* Category and Service Type filter buttons styling */
 .category-filters,
-.filters-container,
-.category-buttons {
+.service-type-filters {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
   flex-wrap: wrap;
-  align-items: center;
+  margin-bottom: 1rem;
 }
 
-.category-filter-btn,
 .category-btn,
-.filter-btn,
-button[class*="category"],
-button[class*="filter"]:not(.clear-filters-btn) {
-  padding: 0.5rem 1rem !important;
-  border: 2px solid #e5e7eb !important;
-  border-radius: 12px !important;
-  background: white !important;
-  color: #667eea !important;
-  font-size: 0.875rem !important;
-  font-weight: 500 !important;
-  cursor: pointer !important;
-  transition: all 0.2s ease !important;
-  text-decoration: none !important;
-  display: inline-block !important;
-  outline: none !important;
-  box-shadow: none !important;
-  -webkit-appearance: none !important;
-  -moz-appearance: none !important;
-  appearance: none !important;
+.service-type-btn {
+  padding: 0.75rem 1.25rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 25px;
+  background: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #6b7280;
+  transition: all 0.3s ease;
+  outline: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  white-space: nowrap;
+  min-width: fit-content;
 }
 
-.category-filter-btn:hover,
 .category-btn:hover,
-.filter-btn:hover,
-button[class*="category"]:hover,
-button[class*="filter"]:not(.clear-filters-btn):hover {
-  border-color: #667eea !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.1) !important;
-  color: #667eea !important;
-  background: white !important;
-  outline: none !important;
+.service-type-btn:hover {
+  border-color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+  color: #667eea;
+  background: white;
 }
 
-.category-filter-btn:focus,
 .category-btn:focus,
-.filter-btn:focus,
-button[class*="category"]:focus,
-button[class*="filter"]:not(.clear-filters-btn):focus {
-  outline: none !important;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
-  border-color: #667eea !important;
+.service-type-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #667eea;
 }
 
-.category-filter-btn.active,
 .category-btn.active,
-.filter-btn.active,
-button[class*="category"].active,
-button[class*="filter"].active:not(.clear-filters-btn) {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  color: white !important;
-  border-color: #667eea !important;
-  outline: none !important;
-  box-shadow: none !important;
+.service-type-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.25);
 }
 
-.category-filter-btn.active:focus,
 .category-btn.active:focus,
-.filter-btn.active:focus,
-button[class*="category"].active:focus,
-button[class*="filter"].active:not(.clear-filters-btn):focus {
-  outline: none !important;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+.service-type-btn.active:focus {
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
 }
 
 /* Clear all filters button and close buttons */
@@ -353,24 +356,25 @@ button[class*="filter"].active:not(.clear-filters-btn):focus {
 button[class*="clear"],
 button[class*="close"],
 button[class*="remove"] {
-  padding: 0.5rem 1rem !important;
+  padding: 0.875rem 1.5rem !important;
   border: 2px solid #e5e7eb !important;
   border-radius: 12px !important;
   background: white !important;
   color: #667eea !important;
-  font-size: 0.875rem !important;
-  font-weight: 500 !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
+  transition: all 0.3s ease !important;
   text-decoration: none !important;
   display: inline-flex !important;
   align-items: center !important;
-  gap: 0.25rem !important;
+  gap: 0.5rem !important;
   outline: none !important;
-  box-shadow: none !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
   -webkit-appearance: none !important;
   -moz-appearance: none !important;
   appearance: none !important;
+  margin-top: 1rem;
 }
 
 .clear-filters-btn:hover,
@@ -380,8 +384,8 @@ button[class*="clear"]:hover,
 button[class*="close"]:hover,
 button[class*="remove"]:hover {
   border-color: #667eea !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.1) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15) !important;
   color: #667eea !important;
   background: white !important;
   outline: none !important;
