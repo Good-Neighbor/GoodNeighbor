@@ -12,7 +12,7 @@ const sortOptions = [
     { value: "category", label: "Category" }
 ];
 
-function ListingsPage({ listings = [], onContact, onFavorite, onShare, onMatch, onClaim, favorites = [], currentUserId, loading = false }) {
+function ListingsPage({ listings = [], onContact, onFavorite, onMatch, onClaim, favorites = [], currentUserId, loading = false }) {
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [searchQuery, setSearchQuery] = useState("");
     const [sortBy, setSortBy] = useState("newest");
@@ -111,22 +111,8 @@ function ListingsPage({ listings = [], onContact, onFavorite, onShare, onMatch, 
     };
 
     const handleListingShare = (listing) => {
-        if (onShare) {
-            onShare(listing);
-        } else {
-            // Default share functionality
-            if (navigator.share) {
-                navigator.share({
-                    title: listing.title,
-                    text: `Check out this free item: ${listing.title}`,
-                    url: window.location.href
-                });
-            } else {
-                // Fallback: copy to clipboard
-                navigator.clipboard.writeText(window.location.href);
-                alert("Link copied to clipboard!");
-            }
-        }
+        // Share functionality is now handled directly in the Listing component
+        console.log('Share requested for:', listing.title);
     };
 
     const handleListingMatch = (listingId, requestor) => {
@@ -323,7 +309,6 @@ function ListingsPage({ listings = [], onContact, onFavorite, onShare, onMatch, 
                                 listing={listing}
                                 onContact={handleListingContact}
                                 onFavorite={handleListingFavorite}
-                                onShare={handleListingShare}
                                 onMatch={handleListingMatch}
                                 onClaim={handleListingClaim}
                                 isFavorited={favorites.includes(listing.id)}

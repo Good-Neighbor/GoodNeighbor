@@ -210,9 +210,53 @@ function AppContent() {
   };
 
   // Handle listing share
-  const handleShare = (listing) => {
-    // You can implement share functionality here
-    console.log('Sharing listing:', listing.title);
+  const handleShare = async (listing) => {
+    const shareData = {
+      title: `${listing.title} - GoodNeighbor`,
+      text: `Check out this free ${listing.type || 'item'} on GoodNeighbor: ${listing.title}`,
+      url: `${window.location.origin}/#/listingspage?listing=${listing.id}`
+    };
+
+    try {
+      // Try native Web Share API first (mobile devices)
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        return;
+      }
+    } catch (error) {
+      console.log('Native sharing failed, falling back to clipboard');
+    }
+
+    // Fallback: Copy to clipboard
+    try {
+      const shareText = `${shareData.title}\n\n${shareData.text}\n\n${shareData.url}`;
+      await navigator.clipboard.writeText(shareText);
+      
+      // Show success message
+      const shareBtn = document.querySelector(`[data-listing-id="${listing.id}"] .share-btn`);
+      if (shareBtn) {
+        const originalText = shareBtn.innerHTML;
+        shareBtn.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <polyline points="20,6 9,17 4,12"/>
+          </svg>
+          Copied!
+        `;
+        shareBtn.style.background = '#42b883';
+        shareBtn.style.color = 'white';
+        
+        setTimeout(() => {
+          shareBtn.innerHTML = originalText;
+          shareBtn.style.background = '';
+          shareBtn.style.color = '';
+        }, 2000);
+      } else {
+        alert('Link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      alert('Failed to share. Please try again.');
+    }
   };
 
   // Handle matching with requestor
@@ -298,13 +342,12 @@ function AppContent() {
           element={
             <ListingsPage 
               listings={listings}
-              loading={loading}
               onContact={handleContact}
               onFavorite={handleFavorite}
-              onShare={handleShare}
               onMatch={handleMatch}
               onClaim={handleClaim}
               currentUserId={currentUser?.uid}
+              loading={loading}
             />
           } 
         />

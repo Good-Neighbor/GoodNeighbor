@@ -12,7 +12,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyDM7ok2P_WnrqMcH69gVC4cR9EP4J9fD_8",
   authDomain: "goodneighbor-b1fb3.firebaseapp.com",
   projectId: "goodneighbor-b1fb3",
-  storageBucket: "goodneighbor-b1fb3.appspot.com",
+  storageBucket: "goodneighbor-b1fb3.firebasestorage.app",
   messagingSenderId: "437041543135",
   appId: "1:437041543135:web:c20ac170d742746f49366a",
   measurementId: "G-CCYJ56JPMB"
