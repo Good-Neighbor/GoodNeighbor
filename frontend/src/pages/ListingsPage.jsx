@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Listing from "../components/Listing";
 import "./ListingsPage.css";
 
-const categories = ["All", "Books & Media", "Electronics", "Toys & Games", "Sports & Outdoors", "Home & Garden", "Office & School Supplies", "Vehicles & Parts", "Baby & Kids"];
+const categories = ["All", "Textbooks/School", "Clothing", "Sports", "Other"];
 
 const sortOptions = [
     { value: "newest", label: "Newest First" },

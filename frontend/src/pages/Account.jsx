@@ -931,14 +931,10 @@ function Account() {
                                                 required
                                             >
                                                 <option value="">Select Category</option>
-                                                <option value="Books & Media">Books & Media</option>
-                                                <option value="Electronics">Electronics</option>
-                                                <option value="Toys & Games">Toys & Games</option>
-                                                <option value="Sports & Outdoors">Sports & Outdoors</option>
-                                                <option value="Home & Garden">Home & Garden</option>
-                                                <option value="Office & School Supplies">Office & School Supplies</option>
-                                                <option value="Vehicles & Parts">Vehicles & Parts</option>
-                                                <option value="Baby & Kids">Baby & Kids</option>
+                                                <option value="Textbooks/School">Textbooks/School</option>
+                                                <option value="Clothing">Clothing</option>
+                                                <option value="Sports">Sports</option>
+                                                <option value="Other">Other</option>
                                             </select>
                                         </div>
                                         

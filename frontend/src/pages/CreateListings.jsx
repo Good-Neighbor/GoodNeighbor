@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./CreateListings.css";
 
-const categories = ["Books & Media", "Electronics", "Toys & Games", "Sports & Outdoors", "Home & Garden", "Office & School Supplies", "Vehicles & Parts", "Baby & Kids"];
+const categories = ["Textbooks/School", "Clothing", "Sports", "Other"];
 
 function CreateListing({ onCreate }){
     const navigate = useNavigate();
