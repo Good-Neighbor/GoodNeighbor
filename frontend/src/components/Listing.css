@@ -494,6 +494,27 @@
     margin: 0 0.2em;
 }
 
+/* Fix status badge positioning in list view */
+.listing-row-meta .status-badge {
+    position: static;
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.listing-row-meta .matched-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: #42b883;
+    color: white;
+}
+
 .listing-row-actions {
     margin-left: 1.5rem;
     display: flex;
