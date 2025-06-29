@@ -85,6 +85,14 @@ function About() {
               </div>
             </a>
           </div>
+          <div className="team-contact">
+            <p className="team-email">
+              <strong>Contact us:</strong>{' '}
+              <a href="mailto:gneighborus@gmail.com" className="email-link">
+                gneighborus@gmail.com
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>
