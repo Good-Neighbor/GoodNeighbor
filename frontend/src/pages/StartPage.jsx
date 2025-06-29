@@ -5,7 +5,16 @@ import { useAuth } from '../contexts/AuthContext';
 
 function StartPage() {
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/signin');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   return (
     <div className="start-container">
@@ -21,35 +30,49 @@ function StartPage() {
           </p>
 
           <div className="start-buttons">
-            <button 
-              className="start-button primary"
-              onClick={() => navigate("/signin")}
-            >
-              Sign In
-            </button>
-            
-            <button 
-              className="start-button secondary"
-              onClick={() => navigate("/listingspage")}
-            >
-              Browse Listings
-            </button>
-            
-            <button 
-              className="start-button secondary"
-              onClick={() => navigate("/createlistings")}
-            >
-              Create Listing
-            </button>
+            {!currentUser ? (
+              // Show sign-in/sign-up buttons for unauthenticated users
+              <>
+                <button 
+                  className="start-button primary"
+                  onClick={() => navigate("/signin")}
+                >
+                  Sign In
+                </button>
+                
+                <button 
+                  className="start-button secondary"
+                  onClick={() => navigate("/signup")}
+                >
+                  Create Account
+                </button>
+              </>
+            ) : (
+              // Show app navigation for authenticated users
+              <>
+                <button 
+                  className="start-button primary"
+                  onClick={() => navigate("/listingspage")}
+                >
+                  Browse Listings
+                </button>
+                
+                <button 
+                  className="start-button secondary"
+                  onClick={() => navigate("/createlistings")}
+                >
+                  Create Listing
+                </button>
 
-            {currentUser && (
-              <button 
-                className="start-button secondary"
-                onClick={() => navigate("/account")}
-              >
-                Account
-              </button>
+                <button 
+                  className="start-button secondary"
+                  onClick={() => navigate("/account")}
+                >
+                  My Account
+                </button>
+              </>
             )}
+            
             <button 
               className="start-button secondary"
               onClick={() => navigate("/about")}
@@ -58,17 +81,19 @@ function StartPage() {
             </button>
           </div>
 
-          <div className="start-footer">
-            <p className="signup-prompt">
-              New to GoodNeighbor?{' '}
-              <button 
-                className="signup-link"
-                onClick={() => navigate("/signup")}
-              >
-                Create an account
-              </button>
-            </p>
-          </div>
+          {!currentUser && (
+            <div className="start-footer">
+              <p className="signup-prompt">
+                New to GoodNeighbor?{' '}
+                <button 
+                  className="signup-link"
+                  onClick={() => navigate("/signup")}
+                >
+                  Create an account
+                </button>
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

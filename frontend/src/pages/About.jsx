@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { getStats } from '../firebaseConfig';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
@@ -7,6 +8,7 @@ import './About.css';
 
 function About() {
   const navigate = useNavigate();
+  const { currentUser, logout } = useAuth();
   const [stats, setStats] = useState({ accounts: 0, listings: 0 });
   const [statsLoading, setStatsLoading] = useState(true);
 
@@ -31,6 +33,15 @@ function About() {
 
   const handleBackToStart = () => {
     navigate('/');
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/signin');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   return (

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import Listing from "../components/Listing";
 import "./ListingsPage.css";
 
@@ -23,6 +24,8 @@ function ListingsPage({ listings = [], onContact, onFavorite, onMatch, onClaim, 
     const [showFilters, setShowFilters] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 18;
+    const { currentUser, logout } = useAuth();
+    const navigate = useNavigate();
 
     // Filter and sort listings
     const filteredAndSortedListings = useMemo(() => {
@@ -147,10 +150,17 @@ function ListingsPage({ listings = [], onContact, onFavorite, onMatch, onClaim, 
         }
     };
 
-    const navigate = useNavigate();
-
     const handleBackToStart = () => {
         navigate('/');
+    };
+
+    const handleLogout = async () => {
+        try {
+            await logout();
+            navigate('/signin');
+        } catch (error) {
+            console.error('Error signing out:', error);
+        }
     };
 
     return (
@@ -164,6 +174,7 @@ function ListingsPage({ listings = [], onContact, onFavorite, onMatch, onClaim, 
                     </svg>
                     Back to Home
                 </button>
+                
                 <div className="header-content">
                     <h1>Marketplace</h1>
                     <p>Find free items and services in your community</p>
