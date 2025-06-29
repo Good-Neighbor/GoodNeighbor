@@ -11,7 +11,7 @@ function StartPage() {
     <div className="start-container">
       <div className="start-card">
         <div className="start-header">
-          <h1 className="start-title">Welcome to GoodNeighbor</h1>
+          <h1 className="start-title">Welcome to Good Neighbor</h1>
           <p className="start-subtitle">Your community marketplace</p>
         </div>
 
