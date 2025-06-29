@@ -76,8 +76,8 @@
 
 .status-badge {
     position: absolute;
-    top: 8px;
-    left: 8px;
+    top: 56px;
+    right: 24px;
     padding: 4px 8px;
     border-radius: 12px;
     font-size: 12px;
@@ -113,7 +113,7 @@
 /* Type Flair Badge */
 .type-flair-badge {
     position: absolute;
-    bottom: 8px;
+    top: 8px;
     left: 8px;
     padding: 4px 8px;
     border-radius: 12px;
