@@ -14,10 +14,11 @@ export async function createListingWithPhotos(form, photos, onProgress) {
   const photoUrls = [];
   for (let i = 0; i < photos.length; i++) {
     const file = photos[i];
-    const storageRef = ref(storage, `listing_photos/${Date.now()}_${file.name}`);
+    const storagePath = `listing_photos/${Date.now()}_${file.name}`;
+    const storageRef = ref(storage, storagePath);
     await uploadBytes(storageRef, file);
     const url = await getDownloadURL(storageRef);
-    photoUrls.push(url);
+    photoUrls.push({ url, path: storagePath });
     if (onProgress) onProgress(i + 1, photos.length);
   }
 

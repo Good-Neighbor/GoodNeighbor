@@ -375,17 +375,15 @@ function AppContent() {
         <Route 
           path="/listingspage" 
           element={
-            <ProtectedRoute>
-              <ListingsPage 
-                listings={listings}
-                onContact={handleContact}
-                onFavorite={handleFavorite}
-                onMatch={handleMatch}
-                onClaim={handleClaim}
-                currentUserId={currentUser?.uid}
-                loading={loading}
-              />
-            </ProtectedRoute>
+            <ListingsPage 
+              listings={listings}
+              onContact={handleContact}
+              onFavorite={handleFavorite}
+              onMatch={handleMatch}
+              onClaim={handleClaim}
+              currentUserId={currentUser?.uid}
+              loading={loading}
+            />
           } 
         />
         <Route 
@@ -405,7 +403,6 @@ function AppContent() {
           } 
         />
         <Route path="/about" element={<About />} />
-        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
   );

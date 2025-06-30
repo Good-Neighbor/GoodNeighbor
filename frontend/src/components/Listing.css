@@ -697,3 +697,36 @@
         font-size: 1rem;
     }
 }
+
+.badge-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 2;
+}
+
+.matched-badge {
+    background: #22c55e;
+    color: #fff;
+    font-weight: bold;
+    border-radius: 0.5rem;
+    padding: 0.15rem 0.7rem;
+    font-size: 0.95rem;
+    margin-bottom: 0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.status-badge {
+    background: #f3f4f6;
+    color: #222;
+    border-radius: 0.5rem;
+    padding: 0.15rem 0.7rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}

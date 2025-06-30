@@ -142,13 +142,17 @@ function Account() {
                 throw new Error(`You can only delete your own ${listingToDelete.type === 'service' ? 'services' : 'listings'}`);
             }
 
-            // Delete photos if they exist
+            // Delete photos from storage if storage path is available
             if (data.photos && data.photos.length > 0) {
                 const deletePromises = data.photos.map(photo => {
-                    const photoRef = ref(storage, photo.path);
-                    return deleteObject(photoRef);
+                    // If photo is an object with a path, delete from storage
+                    if (photo && typeof photo === 'object' && photo.path) {
+                        const photoRef = ref(storage, photo.path);
+                        return deleteObject(photoRef);
+                    }
+                    // If photo is a string (old format), skip deletion
+                    return Promise.resolve();
                 });
-                
                 await Promise.allSettled(deletePromises);
             }
 
@@ -522,12 +526,6 @@ function Account() {
                                             <div className="listing-header">
                                                 <h3>{listing.title}</h3>
                                                 <div className="listing-status">
-                                                    <span className="listing-type-badge item">Item</span>
-                                                    {listing.status !== 'matched' && (
-                                                        <span className={`status-badge ${getStatusClass(listing.status)}`}>
-                                                            {listing.status}
-                                                        </span>
-                                                    )}
                                                     {listing.matchedWith && (
                                                         <span className="matched-badge">✓ Matched</span>
                                                     )}
@@ -577,12 +575,6 @@ function Account() {
                                             <div className="listing-header">
                                                 <h3>{service.title}</h3>
                                                 <div className="listing-status">
-                                                    <span className="listing-type-badge service">Service</span>
-                                                    {service.status !== 'matched' && (
-                                                        <span className={`status-badge ${getStatusClass(service.status)}`}>
-                                                            {service.status}
-                                                        </span>
-                                                    )}
                                                     {service.matchedWith && (
                                                         <span className="matched-badge">✓ Matched</span>
                                                     )}
@@ -645,16 +637,9 @@ function Account() {
                                         <div key={request.id} className="request-card">
                                             <div className="request-header">
                                                 <h3>{request.title}</h3>
-                                                <div className="request-status">
-                                                    {(request.status === 'available' || request.status === 'claimed') && (
-                                                        <span className={`status-badge ${getStatusClass(request.status)}`}>
-                                                            {request.status}
-                                                        </span>
-                                                    )}
-                                                    {request.isMatched && (
-                                                        <span className="matched-badge">✓ Matched</span>
-                                                    )}
-                                                </div>
+                                                {request.isMatched && (
+                                                    <span className="matched-badge">✓ Matched</span>
+                                                )}
                                             </div>
                                             <p className="request-description">{request.description}</p>
                                             <div className="request-meta">

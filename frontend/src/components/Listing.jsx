@@ -298,12 +298,12 @@ function Listing({
                             );
                         })()}
 
-                        {/* Status Badge */}
-                        {(listing.status === 'available' || listing.status === 'claimed') && (
-                            <div className={`status-badge ${getStatusClass(listing.status)}`}>
-                                {listing.status || 'Available'}
-                            </div>
-                        )}
+                        {/* Badge Container: Only Matched */}
+                        <div className="badge-stack">
+                            {listing.status === 'matched' && (
+                                <div className="matched-badge">✓ Matched</div>
+                            )}
+                        </div>
 
                         {/* Type Flair Badge */}
                         {(() => {
